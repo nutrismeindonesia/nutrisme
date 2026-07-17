@@ -1,0 +1,26 @@
+NUTRISME HOTFIX 2026-07-17-3
+================================
+
+Penyebab utama yang ditemukan:
+- Build 2026-07-17-2 sudah terpasang, tetapi script.js masih menunjuk ke URL Web App lama.
+- URL lama: https://script.google.com/macros/s/AKfycbxdVC6gk2-e2s6htjQPtMd8iX4fTWzCqdZEb2jO0BYKmoYZRA6xB-9ObyEGsqsl51w/exec
+- URL aktif yang diberikan pemilik: https://script.google.com/macros/s/AKfycbxN0ZfvGFX1RPp8pFj4Afxk1Q3JECumWYuaZYel8PY-Fc4OvleOvyzHSq_Ljr1sx69X/exec
+
+Perbaikan dalam paket ini:
+- script.js sudah menunjuk ke URL aktif di atas.
+- Build dinaikkan menjadi 2026-07-17-3 agar browser tidak memakai cache lama.
+- index.html memuat script.js?v=20260717-3.
+- apps-script.gs memakai APP_VERSION 2026-07-17-3.
+
+Langkah tercepat:
+1. Upload dan replace index.html serta script.js di root repository GitHub.
+2. Tunggu GitHub Pages selesai deploy.
+3. Buka https://www.nutrisme.biz.id/script.js?v=20260717-3 lalu cari potongan ID:
+   AKfycbxN0ZfvGFX1RPp8pFj4Afxk1Q3JECumWYuaZYel8PY-Fc4OvleOvyzHSq_Ljr1sx69X
+4. Hard refresh domain atau buka Incognito.
+5. Kirim satu pesanan dummy lalu cek Apps Script > Executions.
+
+Backend:
+- Jika URL /exec sudah menampilkan status ok dan version 2026-07-17-2, backend lama sebenarnya sudah cukup.
+- Untuk menyamakan versi, tempel apps-script.gs dari paket ini lalu Deploy > Manage deployments > Edit > New version.
+- Edit deployment yang sama agar URL /exec tidak berubah lagi.

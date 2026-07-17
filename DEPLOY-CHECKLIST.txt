@@ -1,4 +1,4 @@
-NUTRISME BUILD 2026-07-17-2 - CHECKLIST WAJIB
+NUTRISME BUILD 2026-07-17-3 - CHECKLIST WAJIB
 ==============================================
 
 JANGAN upload file ZIP sebagai satu file ke GitHub.
@@ -19,15 +19,15 @@ https://github.com/nutrismeindonesia/nutrisme
 Pastikan branch: main dan file berada di root, bukan di subfolder.
 
 Buka script.js di GitHub dan cari teks berikut:
-  const NUTRISME_BUILD = "2026-07-17-2";
+  const NUTRISME_BUILD = "2026-07-17-3";
   new URLSearchParams(payload)
 
 Kode lama berikut TIDAK BOLEH masih ada:
   headers: { "Content-Type": "application/json" }
 
 Buka index.html di GitHub dan cari:
-  <meta name="nutrisme-build" content="2026-07-17-2" />
-  script.js?v=20260717-2
+  <meta name="nutrisme-build" content="2026-07-17-3" />
+  script.js?v=20260717-3
 
 B. VERIFIKASI GOOGLE APPS SCRIPT
 --------------------------------
@@ -35,7 +35,7 @@ Meng-upload apps-script.gs ke GitHub TIDAK memperbarui Google Apps Script.
 Salin seluruh isi apps-script.gs ke editor Google Apps Script yang dipakai.
 
 Di editor Apps Script, cari teks:
-  APP_VERSION: "2026-07-17-2"
+  APP_VERSION: "2026-07-17-3"
   function doGet()
   function doPost(e)
 
@@ -52,7 +52,7 @@ C. HEALTH CHECK WAJIB
 Buka URL Web App yang berakhir /exec di mode incognito.
 Hasil yang benar harus memuat:
   "status":"ok"
-  "version":"2026-07-17-2"
+  "version":"2026-07-17-3"
 
 Jika masih muncul:
   Script function not found: doGet
@@ -69,8 +69,16 @@ E. VERIFIKASI DOMAIN
 --------------------
 Setelah GitHub Pages selesai:
 1. Buka https://www.nutrisme.biz.id/ di incognito.
-2. View Source dan cari: nutrisme-build 2026-07-17-2
+2. View Source dan cari: nutrisme-build 2026-07-17-3
 3. Buka Developer Tools > Console; harus terlihat:
-   [Nutrisme] build 2026-07-17-2
+   [Nutrisme] build 2026-07-17-3
 4. Baru lakukan satu pesanan uji.
 5. Periksa Google Apps Script > Executions dan spreadsheet tab Pesanan.
+
+TES PEMISAH BACKEND/FRONTEND
+----------------------------
+1. Di Apps Script, pilih fungsi testWriteNutrisme lalu Run.
+2. Fungsi ini menambahkan satu baris bernama TEST NUTRISME tanpa mengirim email.
+3. Jika baris ini tidak muncul, masalah ada pada SPREADSHEET_ID/izin Apps Script.
+4. Jika baris ini muncul tetapi form website gagal, masalah ada pada deployment URL,
+   cache GitHub Pages, atau kode front-end yang belum aktif.

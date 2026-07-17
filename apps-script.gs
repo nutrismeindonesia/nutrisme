@@ -6,7 +6,7 @@ var CONFIG = {
   SHEET_NAME: "Pesanan",
   NOTIFICATION_EMAIL: "nutrismeindonesia@gmail.com",
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-17-2",
+  APP_VERSION: "2026-07-17-3",
   SEND_EMAIL: true
 };
 
@@ -116,6 +116,35 @@ function setupNutrisme() {
 
   console.log(JSON.stringify(result));
   return result;
+}
+
+// Manual write test. Run this from the editor only when diagnosing.
+// It inserts one clearly labeled test row and does not send an email.
+function testWriteNutrisme() {
+  var previousSendEmail = CONFIG.SEND_EMAIL;
+  CONFIG.SEND_EMAIL = false;
+
+  try {
+    var requestId = "manual-test-" + new Date().getTime();
+    var output = doPost({
+      parameter: {
+        action: "createOrder",
+        requestId: requestId,
+        nama: "TEST NUTRISME",
+        alamat: "Baris uji manual dari Google Apps Script",
+        telepon: "81234567890",
+        consent: "yes",
+        source: "Apps Script editor",
+        waktuKlien: new Date().toISOString(),
+        website: ""
+      }
+    });
+
+    console.log("Test row sent with requestId: " + requestId);
+    return output;
+  } finally {
+    CONFIG.SEND_EMAIL = previousSendEmail;
+  }
 }
 
 // Backward-compatible test name from the previous file.
