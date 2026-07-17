@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSubmitState();
 
   // Keep the /exec URL. If Apps Script creates a new deployment URL, replace it here.
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxN0ZfvGFX1RPp8pFj4Afxk1Q3JECumWYuaZYel8PY-Fc4OvleOvyzHSq_Ljr1sx69X/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdVC6gk2-e2s6htjQPtMd8iX4fTWzCqdZEb2jO0BYKmoYZRA6xB-9ObyEGsqsl51w/exec";
   const SUBMIT_TIMEOUT_MS = 20000;
 
   const createRequestId = () => {
