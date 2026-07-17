@@ -2,6 +2,9 @@
    The order form sends a simple cross-origin POST to Google Apps Script.
    Do not use application/json together with mode: "no-cors" here. */
 
+const NUTRISME_BUILD = "2026-07-17-2";
+console.info(`[Nutrisme] build ${NUTRISME_BUILD}`);
+
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
   const header = document.getElementById("siteHeader");
@@ -241,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSubmitState();
 
   // Keep the /exec URL. If Apps Script creates a new deployment URL, replace it here.
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxN0ZfvGFX1RPp8pFj4Afxk1Q3JECumWYuaZYel8PY-Fc4OvleOvyzHSq_Ljr1sx69X/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdVC6gk2-e2s6htjQPtMd8iX4fTWzCqdZEb2jO0BYKmoYZRA6xB-9ObyEGsqsl51w/exec";
   const SUBMIT_TIMEOUT_MS = 20000;
 
   const createRequestId = () => {
@@ -300,6 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await sendOrder({
         action: "createOrder",
+        build: NUTRISME_BUILD,
         requestId: createRequestId(),
         nama: fullName.value.trim(),
         alamat: address.value.trim(),

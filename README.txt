@@ -1,5 +1,13 @@
-NUTRISME - VERSI DIPERBAIKI
+NUTRISME - VERSI DIPERBAIKI (BUILD 2026-07-17-2)
 ============================
+
+
+PENTING SEBELUM MULAI
+---------------------
+Ekstrak ZIP ini. Jangan meng-upload ZIP sebagai satu file. Ganti file lama di
+repository nutrisme/main dengan index.html, script.js, style.css, dan assets
+dari paket ini. Nama file harus persis tanpa tambahan “(1)”. Baca juga
+DEPLOY-CHECKLIST.txt.
 
 MASALAH YANG DIPERBAIKI
 -----------------------

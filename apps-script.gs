@@ -6,7 +6,7 @@ var CONFIG = {
   SHEET_NAME: "Pesanan",
   NOTIFICATION_EMAIL: "nutrismeindonesia@gmail.com",
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-17-1",
+  APP_VERSION: "2026-07-17-2",
   SEND_EMAIL: true
 };
 
