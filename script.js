@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSubmitState();
 
   // ─── Ganti URL ini dengan Web App URL dari Apps Script kamu ───
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5Baguaq8BknPBq5pFLtM9PxGJCk1bZDKi6CLqX0FYxASj0xwadM09O9nHfenSi8LQ/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdVC6gk2-e2s6htjQPtMd8iX4fTWzCqdZEb2jO0BYKmoYZRA6xB-9ObyEGsqsl51w/exec";
 
   orderForm.addEventListener("submit", async (event) => {
     event.preventDefault();
