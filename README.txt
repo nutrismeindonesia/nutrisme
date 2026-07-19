@@ -1,4 +1,4 @@
-NUTRISME LANDING PAGE - BUILD 2026-07-19-11
+NUTRISME LANDING PAGE - BUILD 2026-07-19-12
 ============================================
 
 RINGKASAN PERUBAHAN
@@ -212,3 +212,10 @@ BUILD 2026-07-19-11
 - Lebar form singkat pada Hero diperbesar agar pesan validasi Username Instagram tetap berada pada satu baris dan tidak bertabrakan dengan persetujuan Privacy Policy.
 - Ruang vertikal pesan validasi dan jarak menuju persetujuan diperjelas tanpa mengubah fungsi form.
 - Lebar responsif pada tablet dan mobile tetap dibatasi agar form tidak keluar dari area gambar.
+
+
+BUILD 2026-07-19-12
+-------------------
+- Tombol "Berlangganan" pada header sekarang melakukan smooth scroll ke form singkat di Hero Section.
+- Setelah scroll selesai, field Nama Lengkap otomatis mendapat fokus.
+- Tombol tidak lagi membuka form berlangganan modal.
