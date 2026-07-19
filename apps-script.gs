@@ -1,17 +1,17 @@
 // Nutrisme - Google Apps Script backend
-// Build 2026-07-19-15
+// Build 2026-07-19-16
 // Paste this file into the Apps Script project, save it, run setupNutrisme(),
 // then deploy a new web-app version.
 
 var CONFIG = {
   SPREADSHEET_ID: "1rhOPKMv0HSPlpb_Gl4RpNKdxRd0Y6_qFaTZbMfg8bl0",
-  SHEET_NAME: "Order",
-  NOTIFICATION_EMAILS: ["nutrisme.indonesia@gmail.com"],
+  SHEET_NAME: "Order Nutrisme",
+  NOTIFICATION_EMAILS: ["nutrismeindonesia@gmail.com"],
   EMAIL_SENDER_NAME: "Nutrisme Indonesia",
   SEND_EMAIL_FOR_HERO_LEAD: true,
-  SEND_EMAIL_FOR_FULL_SUBSCRIPTION: true,
+  SEND_EMAIL_FOR_FULL_SUBSCRIPTION: false,
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-19-15",
+  APP_VERSION: "2026-07-19-16",
   SEND_EMAIL: true,
   NEW_CUSTOMER_DISCOUNT: 100000,
   PROMO_BLOCKING_STATUSES: ["PAID", "ACTIVE"],
@@ -106,11 +106,11 @@ function doPost(e) {
     }
 
     var action = data.action || "createOrder";
-    if (["createOrder", "createHeroLead"].indexOf(action) === -1) {
+    if (action !== "createHeroLead") {
       throw new Error("Aksi tidak dikenal.");
     }
 
-    var order = action === "createHeroLead" ? validateHeroLead_(data) : validateOrder_(data);
+    var order = validateHeroLead_(data);
 
     lock = LockService.getScriptLock();
     lock.waitLock(10000);

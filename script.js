@@ -1,4 +1,4 @@
-const NUTRISME_BUILD = "2026-07-19-15";
+const NUTRISME_BUILD = "2026-07-19-16";
 
 const TRANSLATIONS = {
   id: {
@@ -144,11 +144,11 @@ const TRANSLATIONS = {
     "privacy.closeAria": "Tutup Privacy Policy",
     "privacy.close": "Tutup Privacy Policy",
     "privacy.s1.title": "1. Data yang dikumpulkan",
-    "privacy.s1.text": "Form singkat di Hero mengumpulkan nama lengkap, username Instagram, dan persetujuan Privacy Policy. Form berlangganan lengkap juga mengumpulkan alamat, nomor handphone, serta paket pilihan. Kedua form dapat menyimpan informasi teknis pengiriman.",
+    "privacy.s1.text": "Form singkat mengumpulkan nama lengkap, username Instagram, persetujuan Privacy Policy, serta informasi teknis pengiriman.",
     "privacy.s2.title": "2. Tujuan penggunaan",
-    "privacy.s2.text": "Data dari form singkat digunakan untuk menindaklanjuti minat calon pelanggan melalui Instagram. Data dari form lengkap digunakan untuk menghubungi pelanggan, mengonfirmasi paket dan harga, mengatur pengiriman, memberikan layanan pelanggan, serta mencegah spam atau pengiriman ganda.",
+    "privacy.s2.text": "Data dari form singkat digunakan untuk menindaklanjuti minat calon pelanggan melalui Instagram serta mencegah spam atau pengiriman ganda.",
     "privacy.s3.title": "3. Verifikasi promo pelanggan baru",
-    "privacy.s3.text": "Nomor handphone digunakan untuk memeriksa apakah pelanggan pernah memiliki riwayat pembayaran berstatus PAID atau ACTIVE. Jika tidak ditemukan, potongan Rp100.000 dicatat untuk pembayaran bulan pertama. Data berstatus LEAD atau CONTACTED tidak membatalkan kelayakan promo.",
+    "privacy.s3.text": "Verifikasi promo belum dilakukan melalui form singkat karena nomor WhatsApp dan paket belum dikumpulkan. Tim Nutrisme akan mengonfirmasi detail tersebut saat menindaklanjuti calon pelanggan.",
     "privacy.s4.title": "4. Penyimpanan dan pihak yang memproses",
     "privacy.s4.text": "Data formulir diproses melalui Google Apps Script dan dicatat pada Google Sheets. Akses hanya diberikan kepada pihak Nutrisme atau mitra operasional yang membutuhkannya untuk memproses layanan.",
     "privacy.s5.title": "5. Keamanan dan masa penyimpanan",
@@ -156,7 +156,7 @@ const TRANSLATIONS = {
     "privacy.s6.title": "6. Hak pelanggan",
     "privacy.s6.text": "Pelanggan dapat meminta akses, koreksi, pembaruan, atau penghapusan data dengan menghubungi Nutrisme melalui WhatsApp 0812-3456-7890 atau email nutrisme.indonesia@gmail.com.",
     "privacy.s7.title": "7. Persetujuan",
-    "privacy.s7.text": "Dengan mencentang persetujuan dan menekan “Berlangganan Sekarang”, pelanggan menyatakan telah membaca serta menyetujui pemrosesan data sesuai kebijakan ini."
+    "privacy.s7.text": "Dengan mencentang persetujuan dan menekan “Submit”, pengguna menyatakan telah membaca serta menyetujui pemrosesan data sesuai kebijakan ini."
   },
   en: {
     "meta.title": "Nutrisme — Eat Healthy, Your Way",
@@ -302,11 +302,11 @@ const TRANSLATIONS = {
     "privacy.closeAria": "Close Privacy Policy",
     "privacy.close": "Close Privacy Policy",
     "privacy.s1.title": "1. Data we collect",
-    "privacy.s1.text": "The short Hero form collects your full name, Instagram username, and Privacy Policy consent. The full subscription form also collects your address, phone number, and selected plan. Both forms may store technical submission information.",
+    "privacy.s1.text": "The short form collects your full name, Instagram username, Privacy Policy consent, and technical submission information.",
     "privacy.s2.title": "2. How we use the data",
-    "privacy.s2.text": "Data from the short form is used to follow up with prospective customers through Instagram. Data from the full form is used to contact customers, confirm plans and prices, arrange delivery, provide customer support, and prevent spam or duplicate submissions.",
+    "privacy.s2.text": "Data from the short form is used to follow up with prospective customers through Instagram and prevent spam or duplicate submissions.",
     "privacy.s3.title": "3. New-customer offer verification",
-    "privacy.s3.text": "The phone number is used to check whether the customer has a previous payment record marked PAID or ACTIVE. If none is found, a Rp100,000 discount is recorded for the first monthly payment. LEAD or CONTACTED records do not remove eligibility.",
+    "privacy.s3.text": "Offer verification is not performed through the short form because a WhatsApp number and selected plan are not collected yet. The Nutrisme team will confirm these details during follow-up.",
     "privacy.s4.title": "4. Storage and processing parties",
     "privacy.s4.text": "Form data is processed through Google Apps Script and stored in Google Sheets. Access is limited to Nutrisme personnel or operational partners who need the data to provide the service.",
     "privacy.s5.title": "5. Security and retention",
@@ -314,7 +314,7 @@ const TRANSLATIONS = {
     "privacy.s6.title": "6. Customer rights",
     "privacy.s6.text": "Customers may request access, correction, updates, or deletion by contacting Nutrisme through WhatsApp at 0812-3456-7890 or email at nutrisme.indonesia@gmail.com.",
     "privacy.s7.title": "7. Consent",
-    "privacy.s7.text": "By checking the consent box and selecting “Subscribe Now,” the customer confirms that they have read and agreed to the data processing described in this policy."
+    "privacy.s7.text": "By checking the consent box and selecting “Submit,” the user confirms that they have read and agreed to the data processing described in this policy."
   }
 };
 
@@ -325,31 +325,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const languageButtons = document.querySelectorAll("[data-language]");
   const descriptionMeta = document.querySelector('meta[name="description"]');
 
-  const modal = document.getElementById("orderModal");
-  const dialog = modal.querySelector(".modal-dialog");
-  const orderBackdrop = document.getElementById("orderBackdrop");
-  const openers = document.querySelectorAll("[data-open-order]");
-  const closers = modal.querySelectorAll("[data-close-order]");
-
   const privacyModal = document.getElementById("privacyModal");
-  const privacyDialog = privacyModal.querySelector(".privacy-dialog");
-  const privacyOpeners = document.querySelectorAll("#privacyToggle, [data-open-privacy]");
-  const privacyClosers = privacyModal.querySelectorAll("[data-close-privacy]");
-
-  const form = document.getElementById("orderForm");
-  const fullName = document.getElementById("fullName");
-  const instagram = document.getElementById("instagram");
-  const address = document.getElementById("address");
-  const phone = document.getElementById("phone");
-  const selectedPlan = document.getElementById("selectedPlan");
-  const consent = document.getElementById("consent");
-  const submit = document.getElementById("submitOrder");
-  const status = document.getElementById("formStatus");
-  const success = document.getElementById("orderSuccess");
-  const formView = document.getElementById("orderFormView");
-  const reset = document.getElementById("resetOrder");
-  const website = document.getElementById("website");
-  const successText = document.getElementById("successText");
+  const privacyDialog = privacyModal ? privacyModal.querySelector(".privacy-dialog") : null;
+  const privacyOpeners = document.querySelectorAll("[data-open-privacy]");
+  const privacyClosers = privacyModal ? privacyModal.querySelectorAll("[data-close-privacy]") : [];
 
   const heroLeadForm = document.getElementById("heroLeadForm");
   const heroFormScrollButtons = document.querySelectorAll("[data-scroll-hero-form]");
@@ -361,115 +340,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const heroWebsite = document.getElementById("heroWebsite");
 
   let currentLanguage = localStorage.getItem("nutrisme-language") === "en" ? "en" : "id";
-  let lastFocus = null;
   let privacyLastFocus = null;
 
-  year.textContent = new Date().getFullYear();
-
-  heroFormScrollButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      heroLeadForm.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.setTimeout(() => heroFullName.focus({ preventScroll: true }), 650);
-    });
-  });
+  if (year) year.textContent = new Date().getFullYear();
 
   const t = (key) => TRANSLATIONS[currentLanguage][key] || TRANSLATIONS.id[key] || key;
-
-  const updateStatusText = () => {
-    if (submit.getAttribute("aria-busy") === "true") return;
-    status.textContent = isFormValid() ? t("status.complete") : t("status.incomplete");
-  };
-
-  const applyLanguage = (language) => {
-    currentLanguage = language === "en" ? "en" : "id";
-    localStorage.setItem("nutrisme-language", currentLanguage);
-    document.documentElement.lang = currentLanguage;
-    document.title = t("meta.title");
-    if (descriptionMeta) descriptionMeta.setAttribute("content", t("meta.description"));
-
-    document.querySelectorAll("[data-i18n]").forEach((element) => {
-      element.textContent = t(element.dataset.i18n);
-    });
-
-    document.querySelectorAll("[data-i18n-html]").forEach((element) => {
-      element.innerHTML = t(element.dataset.i18nHtml);
-    });
-
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
-      element.setAttribute("placeholder", t(element.dataset.i18nPlaceholder));
-    });
-
-    document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
-      element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
-    });
-
-    languageButtons.forEach((button) => {
-      const active = button.dataset.language === currentLanguage;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-
-    menu.setAttribute("aria-label", nav.classList.contains("mobile-open") ? t("access.closeMenu") : t("access.openMenu"));
-    updateStatusText();
-    updateHeroStatus();
-  };
-
-  languageButtons.forEach((button) => {
-    button.addEventListener("click", () => applyLanguage(button.dataset.language));
-  });
-
-  menu.addEventListener("click", () => {
-    const open = nav.classList.toggle("mobile-open");
-    menu.setAttribute("aria-expanded", String(open));
-    menu.setAttribute("aria-label", open ? t("access.closeMenu") : t("access.openMenu"));
-  });
-
-  document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", () => {
-      nav.classList.remove("mobile-open");
-      menu.setAttribute("aria-expanded", "false");
-      menu.setAttribute("aria-label", t("access.openMenu"));
-    });
-  });
-
-  const reveals = document.querySelectorAll(".reveal");
-  if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.12 });
-    reveals.forEach((element) => observer.observe(element));
-  } else {
-    reveals.forEach((element) => element.classList.add("visible"));
-  }
-
-  const syncBodyLock = () => {
-    const hasOpenModal = modal.classList.contains("open") || privacyModal.classList.contains("open");
-    document.body.style.overflow = hasOpenModal ? "hidden" : "";
-  };
-
-  const normalizePhone = (value) => String(value || "")
-    .replace(/\D/g, "")
-    .replace(/^62/, "")
-    .replace(/^0/, "")
-    .slice(0, 15);
-
   const normalizeIg = (value) => String(value || "").trim().replace(/^@/, "");
-
-  phone.addEventListener("input", () => {
-    phone.value = normalizePhone(phone.value);
-  });
-
-  instagram.addEventListener("input", () => {
-    instagram.value = normalizeIg(instagram.value);
-  });
-
-  heroInstagram.addEventListener("input", () => {
-    heroInstagram.value = normalizeIg(heroInstagram.value);
-  });
 
   const heroValidators = {
     heroFullName: () => heroFullName.value.trim().length >= 3,
@@ -483,206 +359,111 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const markHero = (key, force = false) => {
-    const isValid = heroValidators[key]();
+    const valid = heroValidators[key]();
     const field = heroFields[key];
     if (field) {
       const input = document.getElementById(key);
       const hasValue = String(input.value || "").length > 0;
-      field.classList.toggle("invalid", !isValid && (force || hasValue));
-      field.classList.toggle("valid", isValid);
+      field.classList.toggle("invalid", !valid && (force || hasValue));
+      field.classList.toggle("valid", valid);
     }
-    return isValid;
+    return valid;
   };
 
-  function isHeroFormValid() {
-    return heroValidators.heroFullName()
-      && heroValidators.heroInstagram()
-      && heroValidators.heroConsent();
-  }
+  const isHeroFormValid = () => heroValidators.heroFullName()
+    && heroValidators.heroInstagram()
+    && heroValidators.heroConsent();
 
-  function updateHeroStatus() {
+  const updateHeroStatus = () => {
     if (heroSubmit.getAttribute("aria-busy") === "true") return;
     const valid = isHeroFormValid();
     heroSubmit.disabled = !valid;
     heroFormStatus.textContent = t(valid ? "hero.statusComplete" : "hero.statusIncomplete");
+  };
+
+  const applyLanguage = (language) => {
+    currentLanguage = language === "en" ? "en" : "id";
+    localStorage.setItem("nutrisme-language", currentLanguage);
+    document.documentElement.lang = currentLanguage;
+    document.title = t("meta.title");
+    if (descriptionMeta) descriptionMeta.setAttribute("content", t("meta.description"));
+
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      element.textContent = t(element.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach((element) => {
+      element.innerHTML = t(element.dataset.i18nHtml);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+      element.setAttribute("placeholder", t(element.dataset.i18nPlaceholder));
+    });
+    document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+      element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+    });
+    languageButtons.forEach((button) => {
+      const active = button.dataset.language === currentLanguage;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    if (menu && nav) {
+      menu.setAttribute("aria-label", nav.classList.contains("mobile-open") ? t("access.closeMenu") : t("access.openMenu"));
+    }
+    updateHeroStatus();
+  };
+
+  languageButtons.forEach((button) => button.addEventListener("click", () => applyLanguage(button.dataset.language)));
+
+  if (menu && nav) {
+    menu.addEventListener("click", () => {
+      const open = nav.classList.toggle("mobile-open");
+      menu.setAttribute("aria-expanded", String(open));
+      menu.setAttribute("aria-label", open ? t("access.closeMenu") : t("access.openMenu"));
+    });
   }
 
-  const validators = {
-    fullName: () => fullName.value.trim().length >= 3,
-    instagram: () => /^[A-Za-z0-9._]{2,50}$/.test(normalizeIg(instagram.value)),
-    address: () => address.value.trim().length >= 10,
-    phone: () => /^8\d{7,14}$/.test(normalizePhone(phone.value)),
-    selectedPlan: () => ["Nutrisme Daily", "Nutrisme Ready", "Nutrisme Cook"].includes(selectedPlan.value),
-    consent: () => consent.checked
-  };
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", () => {
+      if (nav) nav.classList.remove("mobile-open");
+      if (menu) menu.setAttribute("aria-expanded", "false");
+    });
+  });
 
-  const fields = {
-    fullName: fullName.closest("[data-field]"),
-    instagram: instagram.closest("[data-field]"),
-    address: address.closest("[data-field]"),
-    phone: phone.closest("[data-field]"),
-    selectedPlan: selectedPlan.closest("[data-field]")
-  };
+  document.querySelectorAll(".reveal").forEach((element) => element.classList.add("visible"));
 
-  const mark = (key, force = false) => {
-    const isValid = validators[key]();
-    const field = fields[key];
-    if (field) {
-      const input = key === "selectedPlan" ? selectedPlan : document.getElementById(key);
-      const hasValue = String(input.value || "").length > 0;
-      field.classList.toggle("invalid", !isValid && (force || hasValue));
-      field.classList.toggle("valid", isValid);
-    }
-    return isValid;
-  };
-
-  function isFormValid() {
-    return validators.fullName()
-      && validators.instagram()
-      && validators.address()
-      && validators.phone()
-      && validators.selectedPlan()
-      && validators.consent();
-  }
-
-  const update = () => {
-    submit.disabled = !isFormValid();
-    updateStatusText();
-  };
-
-  const clearOrderFields = () => {
-    form.reset();
-    selectedPlan.selectedIndex = 0;
-    Object.values(fields).forEach((field) => field.classList.remove("invalid", "valid"));
-    submit.removeAttribute("aria-busy");
-    status.textContent = "";
-    update();
-  };
-
-  const resetOrderForm = ({ focus = false } = {}) => {
-    clearOrderFields();
-    success.hidden = true;
-    formView.hidden = false;
-    dialog.scrollTop = 0;
-
-    if (focus && modal.classList.contains("open")) {
-      window.setTimeout(() => fullName.focus(), 0);
-    }
-  };
-
-  const showSuccess = (mode = "full") => {
-    const translationKey = mode === "hero" ? "success.leadText" : "success.fullText";
-    successText.dataset.i18n = translationKey;
-    successText.textContent = t(translationKey);
-    formView.hidden = true;
-    success.hidden = false;
-    dialog.scrollTop = 0;
-
-    if (!modal.classList.contains("open")) {
-      lastFocus = document.activeElement;
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-      syncBodyLock();
-      window.setTimeout(() => dialog.focus(), 20);
-    }
-  };
-
-  const openModal = (event) => {
-    if (!success.hidden) resetOrderForm();
-    lastFocus = document.activeElement;
-    const plan = event.currentTarget.dataset.plan;
-    if (plan) {
-      selectedPlan.value = plan;
-      mark("selectedPlan");
-      update();
-    }
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    syncBodyLock();
-    window.setTimeout(() => dialog.focus(), 20);
-  };
-
-  const closeModal = () => {
-    if (privacyModal.classList.contains("open")) closePrivacy({ restoreFocus: false });
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    syncBodyLock();
-    if (lastFocus instanceof HTMLElement) lastFocus.focus();
-  };
+  heroFormScrollButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      heroLeadForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => heroFullName.focus({ preventScroll: true }), 650);
+    });
+  });
 
   const openPrivacy = (event) => {
+    if (!privacyModal || !privacyDialog) return;
     privacyLastFocus = document.activeElement;
     privacyModal.classList.add("open");
     privacyModal.setAttribute("aria-hidden", "false");
-
-    if (modal.classList.contains("open")) {
-      dialog.setAttribute("aria-hidden", "true");
-      dialog.setAttribute("inert", "");
-    }
-
+    document.body.style.overflow = "hidden";
     privacyDialog.scrollTop = 0;
-    syncBodyLock();
     window.setTimeout(() => privacyDialog.focus(), 20);
     if (event) event.preventDefault();
   };
 
-  function closePrivacy({ restoreFocus = true } = {}) {
+  const closePrivacy = () => {
+    if (!privacyModal) return;
     privacyModal.classList.remove("open");
     privacyModal.setAttribute("aria-hidden", "true");
-    dialog.removeAttribute("aria-hidden");
-    dialog.removeAttribute("inert");
-    syncBodyLock();
-    if (restoreFocus && privacyLastFocus instanceof HTMLElement) privacyLastFocus.focus();
-  }
-
-  const trapFocus = (container, event) => {
-    if (event.key !== "Tab") return;
-    const focusable = [...container.querySelectorAll(
-      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )].filter((element) => !element.hidden && element.offsetParent !== null);
-
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (event.shiftKey && (document.activeElement === first || document.activeElement === container)) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    document.body.style.overflow = "";
+    if (privacyLastFocus instanceof HTMLElement) privacyLastFocus.focus();
   };
 
-  openers.forEach((button) => button.addEventListener("click", openModal));
-  closers.forEach((button) => button.addEventListener("click", closeModal));
   privacyOpeners.forEach((button) => button.addEventListener("click", openPrivacy));
-  privacyClosers.forEach((button) => button.addEventListener("click", () => closePrivacy()));
-
-  orderBackdrop.addEventListener("click", () => {
-    if (!success.hidden) {
-      resetOrderForm({ focus: true });
-      return;
-    }
-    closeModal();
-  });
-
-  dialog.addEventListener("click", (event) => {
-    if (success.hidden) return;
-    if (event.target.closest("[data-close-order], #resetOrder")) return;
-    resetOrderForm({ focus: true });
-  });
-
-  dialog.addEventListener("keydown", (event) => trapFocus(dialog, event));
-  privacyDialog.addEventListener("keydown", (event) => trapFocus(privacyDialog, event));
-
+  Array.from(privacyClosers).forEach((button) => button.addEventListener("click", closePrivacy));
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (privacyModal.classList.contains("open")) {
-      closePrivacy();
-    } else if (modal.classList.contains("open")) {
-      closeModal();
-    }
+    if (event.key === "Escape" && privacyModal && privacyModal.classList.contains("open")) closePrivacy();
+  });
+
+  heroInstagram.addEventListener("input", () => {
+    heroInstagram.value = normalizeIg(heroInstagram.value);
   });
 
   [heroFullName, heroInstagram].forEach((input) => {
@@ -694,26 +475,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   heroConsent.addEventListener("change", updateHeroStatus);
 
-  [fullName, instagram, address, phone].forEach((input) => {
-    input.addEventListener("input", () => {
-      mark(input.id);
-      update();
-    });
-    input.addEventListener("blur", () => mark(input.id, true));
-  });
-
-  selectedPlan.addEventListener("change", () => {
-    mark("selectedPlan", true);
-    update();
-  });
-  selectedPlan.addEventListener("blur", () => mark("selectedPlan", true));
-  consent.addEventListener("change", update);
-
   const appsScriptMeta = document.querySelector('meta[name="nutrisme-apps-script-url"]');
   const APPS_SCRIPT_URL = String(appsScriptMeta ? appsScriptMeta.content : "").trim();
   const SUBMISSION_CONFIRM_TIMEOUT_MS = 30000;
   const STATUS_POLL_INTERVAL_MS = 900;
-
   const delay = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
   const jsonpRequest = (parameters, timeoutMs = 8000) => new Promise((resolve, reject) => {
@@ -723,48 +488,30 @@ document.addEventListener("DOMContentLoaded", () => {
       reject(error);
       return;
     }
-
     const callbackName = `__nutrismeJsonp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const script = document.createElement("script");
     let timer = null;
-
     const cleanup = () => {
       if (timer) window.clearTimeout(timer);
       script.remove();
-      try {
-        delete window[callbackName];
-      } catch (error) {
-        window[callbackName] = undefined;
-      }
+      try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
     };
-
-    window[callbackName] = (response) => {
-      cleanup();
-      resolve(response);
-    };
-
+    window[callbackName] = (response) => { cleanup(); resolve(response); };
     script.onerror = () => {
       cleanup();
       const error = new Error("Apps Script tidak dapat dijangkau.");
       error.code = "BACKEND_UNREACHABLE";
       reject(error);
     };
-
-    const query = new URLSearchParams({
-      ...parameters,
-      callback: callbackName,
-      _: String(Date.now())
-    });
+    const query = new URLSearchParams({ ...parameters, callback: callbackName, _: String(Date.now()) });
     script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
     script.async = true;
-
     timer = window.setTimeout(() => {
       cleanup();
       const error = new Error("Apps Script tidak merespons.");
       error.code = "BACKEND_UNREACHABLE";
       reject(error);
     }, timeoutMs);
-
     document.head.appendChild(script);
   });
 
@@ -774,19 +521,16 @@ document.addEventListener("DOMContentLoaded", () => {
       error.code = "BACKEND_CONFIG";
       throw error;
     }
-
     const frameName = `nutrismeSubmit_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const frame = document.createElement("iframe");
     frame.name = frameName;
     frame.title = "Nutrisme submission transport";
     frame.hidden = true;
-
     const transportForm = document.createElement("form");
     transportForm.method = "POST";
     transportForm.action = APPS_SCRIPT_URL;
     transportForm.target = frameName;
     transportForm.hidden = true;
-
     Object.entries(payload).forEach(([name, value]) => {
       const input = document.createElement("input");
       input.type = "hidden";
@@ -794,7 +538,6 @@ document.addEventListener("DOMContentLoaded", () => {
       input.value = String(value == null ? "" : value);
       transportForm.appendChild(input);
     });
-
     document.body.append(frame, transportForm);
     transportForm.submit();
     transportForm.remove();
@@ -804,7 +547,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const waitForStoredRequest = async (requestId) => {
     const deadline = Date.now() + SUBMISSION_CONFIRM_TIMEOUT_MS;
     let lastError = null;
-
     while (Date.now() < deadline) {
       try {
         const response = await jsonpRequest({ action: "status", requestId }, 7000);
@@ -813,41 +555,22 @@ document.addEventListener("DOMContentLoaded", () => {
           error.code = "BACKEND_ERROR";
           throw error;
         }
-        if (response && response.status === "ok" && response.found === true) {
-          return response;
-        }
-      } catch (error) {
-        lastError = error;
-      }
+        if (response && response.status === "ok" && response.found === true) return response;
+      } catch (error) { lastError = error; }
       await delay(STATUS_POLL_INTERVAL_MS);
     }
-
     const error = new Error(lastError ? lastError.message : "Data tidak ditemukan di Spreadsheet.");
     error.code = lastError && lastError.code === "BACKEND_ERROR" ? "BACKEND_ERROR" : "SUBMISSION_UNCONFIRMED";
     throw error;
   };
 
-  const submitToSpreadsheet = async (payload) => {
-    postViaHiddenFrame(payload);
-    return waitForStoredRequest(payload.requestId);
-  };
-
-  const createRequestId = () => {
-    if (window.crypto && typeof window.crypto.randomUUID === "function") {
-      return window.crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  };
+  const createRequestId = () => (window.crypto && typeof window.crypto.randomUUID === "function")
+    ? window.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   heroLeadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-
-    const checks = [
-      markHero("heroFullName", true),
-      markHero("heroInstagram", true),
-      heroValidators.heroConsent()
-    ];
-
+    const checks = [markHero("heroFullName", true), markHero("heroInstagram", true), heroValidators.heroConsent()];
     if (!checks.every(Boolean)) {
       heroFormStatus.textContent = t("hero.statusInvalid");
       const firstInvalid = [heroFullName, heroInstagram, heroConsent].find((element) => !element.checkValidity());
@@ -858,11 +581,10 @@ document.addEventListener("DOMContentLoaded", () => {
     heroSubmit.disabled = true;
     heroSubmit.setAttribute("aria-busy", "true");
     heroFormStatus.textContent = t("hero.statusSending");
-
     const requestId = createRequestId();
 
     try {
-      await submitToSpreadsheet({
+      postViaHiddenFrame({
         action: "createHeroLead",
         build: NUTRISME_BUILD,
         requestId,
@@ -874,12 +596,11 @@ document.addEventListener("DOMContentLoaded", () => {
         waktuKlien: new Date().toISOString(),
         website: heroWebsite.value.trim()
       });
-
+      await waitForStoredRequest(requestId);
       heroLeadForm.reset();
       Object.values(heroFields).forEach((field) => field.classList.remove("invalid", "valid"));
-      heroSubmit.removeAttribute("aria-busy");
-      updateHeroStatus();
-      showSuccess("hero");
+      heroFormStatus.textContent = t("success.leadText");
+      heroSubmit.disabled = true;
     } catch (error) {
       console.error("Hero lead gagal tersimpan:", error);
       const backendProblem = error && ["BACKEND_CONFIG", "BACKEND_UNREACHABLE", "BACKEND_ERROR"].includes(error.code);
@@ -890,77 +611,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const checks = [
-      mark("fullName", true),
-      mark("instagram", true),
-      mark("address", true),
-      mark("phone", true),
-      mark("selectedPlan", true),
-      validators.consent()
-    ];
-
-    if (!checks.every(Boolean)) {
-      status.textContent = t("status.invalid");
-      const firstInvalid = [fullName, instagram, address, phone, selectedPlan, consent]
-        .find((element) => !element.checkValidity() || (element === selectedPlan && !validators.selectedPlan()));
-      if (firstInvalid) firstInvalid.focus();
-      return;
-    }
-
-    submit.disabled = true;
-    submit.setAttribute("aria-busy", "true");
-    status.textContent = t("status.sending");
-
-    const requestId = createRequestId();
-
-    try {
-      await submitToSpreadsheet({
-        action: "createOrder",
-        build: NUTRISME_BUILD,
-        requestId,
-        bahasa: currentLanguage,
-        nama: fullName.value.trim(),
-        instagram: normalizeIg(instagram.value),
-        alamat: address.value.trim(),
-        telepon: normalizePhone(phone.value),
-        paket: selectedPlan.value,
-        consent: "yes",
-        source: window.location.href,
-        waktuKlien: new Date().toISOString(),
-        website: website.value.trim()
-      });
-
-      // Kosongkan seluruh field hanya setelah data terkonfirmasi tersimpan.
-      // Tampilan sukses tetap terlihat, dan saat form dibuka kembali semua input sudah bersih.
-      clearOrderFields();
-      showSuccess("full");
-    } catch (error) {
-      console.error("Subscription gagal tersimpan:", error);
-      const backendProblem = error && ["BACKEND_CONFIG", "BACKEND_UNREACHABLE", "BACKEND_ERROR"].includes(error.code);
-      status.textContent = t(backendProblem ? "status.backend" : "status.timeout");
-      submit.disabled = false;
-    } finally {
-      submit.removeAttribute("aria-busy");
-    }
-  });
-
-  reset.addEventListener("click", (event) => {
-    event.stopPropagation();
-    resetOrderForm({ focus: true });
-  });
-
   jsonpRequest({ action: "health" }, 9000)
     .then((response) => {
       const connected = response && response.status === "ok" && response.connected === true;
       document.documentElement.dataset.backend = connected ? "connected" : "error";
-      if (!connected || response.version !== NUTRISME_BUILD) {
-        console.warn("[Nutrisme] Apps Script deployment perlu diperbarui.", response);
-      } else {
-        console.info(`[Nutrisme] Google Sheets connected — backend ${response.version}`);
-      }
+      if (!connected || response.version !== NUTRISME_BUILD) console.warn("[Nutrisme] Apps Script deployment perlu diperbarui.", response);
     })
     .catch((error) => {
       document.documentElement.dataset.backend = "error";
@@ -968,6 +623,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   applyLanguage(currentLanguage);
-  update();
   updateHeroStatus();
 });
