@@ -1,4 +1,4 @@
-const NUTRISME_BUILD = "2026-07-19-16";
+const NUTRISME_BUILD = "2026-07-19-17";
 
 const TRANSLATIONS = {
   id: {
@@ -137,6 +137,7 @@ const TRANSLATIONS = {
     "success.fullText": "Data langgananmu sudah dikirim. Tim Nutrisme akan memverifikasi promo dan menghubungimu untuk konfirmasi.",
     "success.leadText": "Minatmu sudah kami catat. Tim Nutrisme akan menghubungimu melalui Instagram untuk informasi berikutnya.",
     "success.again": "Pesan Lagi",
+    "success.close": "Tutup",
     "privacy.link": "Privacy Policy",
     "privacy.kicker": "PRIVACY POLICY",
     "privacy.title": "Kebijakan Privasi Nutrisme",
@@ -295,6 +296,7 @@ const TRANSLATIONS = {
     "success.fullText": "Your subscription request has been sent. The Nutrisme team will verify the offer and contact you for confirmation.",
     "success.leadText": "We have recorded your interest. The Nutrisme team will contact you through Instagram with the next information.",
     "success.again": "Submit Another Request",
+    "success.close": "Close",
     "privacy.link": "Privacy Policy",
     "privacy.kicker": "PRIVACY POLICY",
     "privacy.title": "Nutrisme Privacy Policy",
@@ -339,8 +341,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const heroFormStatus = document.getElementById("heroFormStatus");
   const heroWebsite = document.getElementById("heroWebsite");
 
+  const thankYouModal = document.getElementById("thankYouModal");
+  const thankYouDialog = thankYouModal ? thankYouModal.querySelector(".thank-you-dialog") : null;
+  const thankYouClosers = thankYouModal ? thankYouModal.querySelectorAll("[data-close-thank-you]") : [];
+
   let currentLanguage = localStorage.getItem("nutrisme-language") === "en" ? "en" : "id";
   let privacyLastFocus = null;
+  let thankYouLastFocus = null;
 
   if (year) year.textContent = new Date().getFullYear();
 
@@ -568,6 +575,35 @@ document.addEventListener("DOMContentLoaded", () => {
     ? window.crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  const openThankYou = () => {
+    if (!thankYouModal || !thankYouDialog) return;
+    thankYouLastFocus = document.activeElement;
+    thankYouModal.classList.add("open");
+    thankYouModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    window.setTimeout(() => thankYouDialog.focus(), 20);
+  };
+
+  const closeThankYou = () => {
+    if (!thankYouModal) return;
+    thankYouModal.classList.remove("open");
+    thankYouModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = privacyModal && privacyModal.classList.contains("open") ? "hidden" : "";
+    if (thankYouLastFocus instanceof HTMLElement) thankYouLastFocus.focus();
+  };
+
+  thankYouClosers.forEach((element) => element.addEventListener("click", closeThankYou));
+
+  if (thankYouDialog) {
+    thankYouDialog.addEventListener("click", (event) => event.stopPropagation());
+  }
+
+  if (thankYouModal) {
+    thankYouModal.addEventListener("click", (event) => {
+      if (event.target === thankYouModal) closeThankYou();
+    });
+  }
+
   heroLeadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const checks = [markHero("heroFullName", true), markHero("heroInstagram", true), heroValidators.heroConsent()];
@@ -599,8 +635,9 @@ document.addEventListener("DOMContentLoaded", () => {
       await waitForStoredRequest(requestId);
       heroLeadForm.reset();
       Object.values(heroFields).forEach((field) => field.classList.remove("invalid", "valid"));
-      heroFormStatus.textContent = t("success.leadText");
+      heroFormStatus.textContent = "";
       heroSubmit.disabled = true;
+      openThankYou();
     } catch (error) {
       console.error("Hero lead gagal tersimpan:", error);
       const backendProblem = error && ["BACKEND_CONFIG", "BACKEND_UNREACHABLE", "BACKEND_ERROR"].includes(error.code);
@@ -608,6 +645,13 @@ document.addEventListener("DOMContentLoaded", () => {
       heroSubmit.disabled = false;
     } finally {
       heroSubmit.removeAttribute("aria-busy");
+    }
+  });
+
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && thankYouModal && thankYouModal.classList.contains("open")) {
+      closeThankYou();
     }
   });
 

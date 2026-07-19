@@ -1243,3 +1243,18 @@
     margin-top:10px;
   }
 }
+
+
+/* Build 2026-07-19-17: success confirmation modal for the active short form. */
+.thank-you-modal{z-index:420;}
+.thank-you-dialog{width:min(500px,100%);padding:34px;}
+.thank-you-content{padding:28px 12px 12px;}
+.thank-you-content>div{width:76px;height:76px;font-size:2.3rem;}
+.thank-you-content h2{font-family:var(--serif);color:var(--green);font-size:2.35rem;}
+.thank-you-content p{max-width:390px;margin:12px auto 24px;color:var(--muted);}
+.thank-you-content .btn{min-width:150px;}
+@media(max-width:680px){
+  .thank-you-dialog{padding:28px 20px;}
+  .thank-you-content{padding:24px 4px 8px;}
+  .thank-you-content h2{font-size:2rem;}
+}
