@@ -4,28 +4,41 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07563f">
-  <meta name="nutrisme-build" content="2026-07-18-2">
-  <meta name="description" content="Nutrisme menyediakan makanan sehat dengan informasi nutrisi lengkap serta pilihan fresh meal, ready-to-heat, dan ready-to-cook.">
-  <title>Nutrisme — Eat Healthy, Your Way</title>
+  <meta name="nutrisme-build" content="2026-07-19-11">
+  <meta name="description" content="Nutrisme menghadirkan paket makanan sehat dengan nutrisi transparan, pilihan fleksibel, dan promo pelanggan baru.">
+  <title>Nutrisme — Makan Sehat, Sesuai Caramu</title>
   <link rel="icon" type="image/png" href="assets/nutrisme-mark.png">
-  <link rel="stylesheet" href="style.css?v=20260718-2">
+  <link rel="stylesheet" href="style.css?v=20260719-11">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+  <a class="skip-link" href="#main-content" data-i18n="access.skip">Lewati ke konten utama</a>
 
   <header class="site-header" id="siteHeader">
     <div class="container nav-wrap">
-      <a class="brand" href="#home" aria-label="Nutrisme beranda">
+      <a class="brand" href="#home" aria-label="Nutrisme beranda" data-i18n-aria-label="access.home">
         <img src="assets/nutrisme-wordmark.png" alt="Nutrisme">
       </a>
-      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
-        <a href="#meal-style">Meals</a>
-        <a href="#meal-style">Meal Plans</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#why-us">About Us</a>
+
+      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama" data-i18n-aria-label="access.nav">
+        <a href="#home" data-i18n="nav.home">Beranda</a>
+        <a href="#why-us" data-i18n="nav.why">Keunggulan</a>
+        <a href="#meal-style" data-i18n="nav.plans">Paket</a>
+        <a href="#how-it-works" data-i18n="nav.how">Cara Kerja</a>
       </nav>
-      <button class="btn btn-primary nav-cta" type="button" data-open-order>Berlangganan Sekarang <span>→</span></button>
-      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Buka menu" aria-expanded="false"><span></span><span></span><span></span></button>
+
+      <div class="language-switch" role="group" aria-label="Pilih bahasa" data-i18n-aria-label="access.language">
+        <button type="button" class="language-switch__button is-active" data-language="id" aria-pressed="true">ID</button>
+        <span aria-hidden="true">|</span>
+        <button type="button" class="language-switch__button" data-language="en" aria-pressed="false">EN</button>
+      </div>
+
+      <button class="btn btn-primary nav-cta" type="button" data-open-order>
+        <span data-i18n="cta.subscribeShort">Berlangganan</span><span aria-hidden="true">→</span>
+      </button>
+
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Buka menu" data-i18n-aria-label="access.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
@@ -33,100 +46,193 @@
     <section class="hero" id="home">
       <div class="container hero-grid">
         <div class="hero-copy reveal">
-          <h1>Eat Healthy.<br><span>Your Way</span></h1>
-          <p>Ketahui kandungan gula, garam, lemak, serat, kalori, dan protein di setiap menu. Pilih Ready-to-eat, Ready-to-heat, atau Ready-to-cook sesuai kebutuhanmu.</p>
-          <div class="promo-note"><span>🎁</span><div><strong>Dapatkan potongan Rp 100.000</strong><small>untuk pelanggan baru yang berlangganan hari ini.</small></div></div>
-          <div class="hero-actions">
-            <button class="btn btn-primary" type="button" data-open-order>Berlangganan Sekarang <span>→</span></button>
-            <a class="btn btn-outline" href="#meal-style">Explore Meals <span>→</span></a>
+          <div class="launch-badge" role="status">
+            <span class="launch-badge__icon" aria-hidden="true"></span>
+            <span data-i18n="hero.launching">SEGERA HADIR — JAKARTA</span>
           </div>
+          <h1 data-i18n-html="hero.title">Makan Sehat.<br><span>Sesuai Caramu</span></h1>
+          <p data-i18n="hero.description">Ketahui kandungan gula, garam, lemak, serat, kalori, dan protein di setiap menu. Pilih Fresh Meal, Ready-to-Heat, atau Ready-to-Cook sesuai kebutuhanmu.</p>
+
+          <div class="promo-highlight" role="note" aria-label="Promo pelanggan baru" data-i18n-aria-label="promo.aria">
+            <div class="promo-highlight__icon" aria-hidden="true">🎁</div>
+            <div class="promo-highlight__content">
+              <span class="promo-highlight__badge" data-i18n="promo.badge">PROMO PELANGGAN BARU</span>
+              <strong><span data-i18n="promo.save">HEMAT</span> <em>Rp100.000</em></strong>
+              <p data-i18n="promo.detail">Otomatis berlaku untuk pembayaran bulan pertama semua paket. Tanpa kode promo.</p>
+            </div>
+          </div>
+
         </div>
 
-        <div class="hero-showcase reveal" aria-label="Pilihan produk Nutrisme">
+        <div class="hero-showcase reveal" aria-label="Pilihan produk Nutrisme" data-i18n-aria-label="access.products">
           <article class="showcase-card fresh">
-            <div class="showcase-tag"><span>◉</span><div><strong>Fresh Meal</strong><small>Freshly cooked, delivered to you.</small></div></div>
+            <div class="showcase-tag"><span aria-hidden="true">◉</span><div><strong data-i18n="formats.fresh.title">Fresh Meal</strong><small data-i18n="formats.fresh.short">Dimasak segar dan diantar untukmu.</small></div></div>
             <img src="assets/meal-box-green.webp" alt="Fresh meal Nutrisme">
-            <span class="showcase-pill">Fresh Meal</span>
+            <span class="showcase-pill" data-i18n="formats.fresh.title">Fresh Meal</span>
           </article>
           <article class="showcase-card heat">
-            <div class="showcase-tag"><span>▣</span><div><strong>Ready-to-Heat</strong><small>Heat it up, ready in minutes.</small></div></div>
+            <div class="showcase-tag"><span aria-hidden="true">▣</span><div><strong data-i18n="formats.heat.title">Ready-to-Heat</strong><small data-i18n="formats.heat.short">Panaskan dan nikmati dalam hitungan menit.</small></div></div>
             <img src="assets/weekly-prep-gradient.webp" alt="Ready-to-heat Nutrisme">
-            <span class="showcase-pill">Ready-to-heat</span>
+            <span class="showcase-pill" data-i18n="formats.heat.title">Ready-to-Heat</span>
           </article>
           <article class="showcase-card cook">
-            <div class="showcase-tag"><span>♨</span><div><strong>Ready-to-Cook</strong><small>Cook with fresh ingredients & spices.</small></div></div>
+            <div class="showcase-tag"><span aria-hidden="true">♨</span><div><strong data-i18n="formats.cook.title">Ready-to-Cook</strong><small data-i18n="formats.cook.short">Masak praktis dengan bahan dan bumbu terukur.</small></div></div>
             <img src="assets/cook-kit.webp" alt="Ready-to-cook Nutrisme">
-            <span class="showcase-pill">Ready-to-cook</span>
+            <span class="showcase-pill" data-i18n="formats.cook.title">Ready-to-Cook</span>
           </article>
+
+          <form class="hero-lead-form" id="heroLeadForm" novalidate>
+            <div class="hero-lead-form__header">
+              <span data-i18n="hero.formKicker">MULAI DARI SINI</span>
+              <h2 data-i18n="hero.formTitle">Tertarik dengan Nutrisme?</h2>
+              <p data-i18n="hero.formIntro">Isi data singkat berikut dan tim kami akan menghubungimu melalui Instagram.</p>
+            </div>
+
+            <div class="hero-lead-form__grid">
+              <div class="hero-form-field" data-hero-field="heroFullName">
+                <label for="heroFullName" data-i18n="form.name">Nama Lengkap</label>
+                <input id="heroFullName" name="heroFullName" type="text" autocomplete="name" minlength="3" required placeholder="Masukkan nama lengkap" data-i18n-placeholder="form.namePlaceholder">
+                <small data-i18n="validation.name">Minimal 3 karakter.</small>
+              </div>
+
+              <div class="hero-form-field" data-hero-field="heroInstagram">
+                <label for="heroInstagram" data-i18n="form.instagram">Username Instagram</label>
+                <div class="hero-prefix-input"><span aria-hidden="true">@</span><input id="heroInstagram" name="heroInstagram" type="text" autocomplete="off" minlength="2" maxlength="50" required placeholder="username" data-i18n-placeholder="form.instagramPlaceholder"></div>
+                <small data-i18n="validation.instagram">Gunakan huruf, angka, titik, atau underscore.</small>
+              </div>
+            </div>
+
+            <input id="heroWebsite" name="heroWebsite" type="text" tabindex="-1" autocomplete="off" class="honeypot">
+
+            <div class="hero-consent" data-hero-field="heroConsent">
+              <input id="heroConsent" name="heroConsent" type="checkbox" required>
+              <div>
+                <label for="heroConsent" data-i18n="form.consent">Saya telah membaca dan menyetujui</label>
+                <button class="privacy-link" type="button" data-open-privacy aria-haspopup="dialog" aria-controls="privacyModal" data-i18n="privacy.link">Privacy Policy</button><span aria-hidden="true">.</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary hero-submit" id="heroSubmit" type="submit" disabled data-i18n="hero.submit">Submit</button>
+            <p class="hero-form-status" id="heroFormStatus" aria-live="polite"></p>
+          </form>
         </div>
       </div>
+
+      <p class="container promo-verification" data-i18n="promo.verification">Kelayakan promo diverifikasi otomatis berdasarkan riwayat pembayaran pada nomor WhatsApp.</p>
+
       <div class="container trust-strip">
-        <article><span>🌿</span><div><strong>Nutrition Transparency</strong><small>Kandungan gizi lengkap di setiap menu.</small></div></article>
-        <article><span>✓</span><div><strong>Balanced & Delicious</strong><small>Menu lezat dengan nutrisi seimbang.</small></div></article>
-        <article><span>🚚</span><div><strong>Delivered Fresh</strong><small>Pilihan fresh meal siap antar ke rumah.</small></div></article>
-        <article><span>♡</span><div><strong>Flexible Choices</strong><small>Fresh, ready-to-heat, atau ready-to-cook.</small></div></article>
+        <article><span aria-hidden="true">🌿</span><div><strong data-i18n="trust.transparent.title">Nutrisi Transparan</strong><small data-i18n="trust.transparent.text">Informasi gizi lengkap di setiap menu.</small></div></article>
+        <article><span aria-hidden="true">✓</span><div><strong data-i18n="trust.balanced.title">Seimbang & Lezat</strong><small data-i18n="trust.balanced.text">Menu nikmat dengan komposisi terencana.</small></div></article>
+        <article><span aria-hidden="true">🚚</span><div><strong data-i18n="trust.delivery.title">Pengiriman Fleksibel</strong><small data-i18n="trust.delivery.text">Disesuaikan dengan paket dan jadwalmu.</small></div></article>
+        <article><span aria-hidden="true">♡</span><div><strong data-i18n="trust.choice.title">Pilihan Fleksibel</strong><small data-i18n="trust.choice.text">Fresh, siap dipanaskan, atau siap dimasak.</small></div></article>
       </div>
     </section>
 
     <section class="section why-us" id="why-us">
       <div class="container">
         <div class="section-title reveal">
-          <span class="kicker">🌱 WHY NUTRISME?</span>
-          <h2>Why Customers <span>Love Nutrisme</span></h2>
-          <p>We make healthy eating easier, clearer, and more flexible for everyday life.</p>
+          <span class="kicker" data-i18n="why.kicker">🌱 MENGAPA NUTRISME?</span>
+          <h2 data-i18n-html="why.title">Alasan Pelanggan <span>Memilih Nutrisme</span></h2>
+          <p data-i18n="why.intro">Kami membuat pola makan sehat terasa lebih mudah, jelas, dan fleksibel untuk dijalani setiap hari.</p>
         </div>
         <div class="why-grid">
-          <article class="info-card reveal"><div class="icon-disc">▤</div><h3>Complete Nutrition Transparency</h3><p>Ketahui kalori, protein, karbohidrat, lemak, serat, dan mikronutrisi pada setiap menu.</p></article>
-          <article class="info-card reveal"><div class="icon-disc">▦</div><h3>Flexible Meal Experience</h3><p>Pilih Ready-to-eat, Ready-to-heat, atau Ready-to-cook sesuai jadwalmu.</p></article>
-          <article class="info-card reveal"><div class="icon-disc">♙</div><h3>Nutritionist Supervised</h3><p>Menu dirancang agar seimbang, lengkap, dan tetap nikmat untuk dikonsumsi.</p></article>
-          <article class="info-card reveal"><div class="icon-disc">◎</div><h3>Personalised Nutrition</h3><p>Sesuaikan pilihan makanan dengan target kalori, protein, serat, dan kebutuhanmu.</p></article>
+          <article class="info-card reveal"><div class="icon-disc" aria-hidden="true">▤</div><h3 data-i18n="why.card1.title">Transparansi Nutrisi Lengkap</h3><p data-i18n="why.card1.text">Ketahui kalori, protein, karbohidrat, lemak, serat, serta informasi penting lain pada setiap menu.</p></article>
+          <article class="info-card reveal"><div class="icon-disc" aria-hidden="true">▦</div><h3 data-i18n="why.card2.title">Pengalaman Makan Fleksibel</h3><p data-i18n="why.card2.text">Pilih Fresh Meal, Ready-to-Heat, atau Ready-to-Cook sesuai jadwal dan tingkat kepraktisanmu.</p></article>
+          <article class="info-card reveal"><div class="icon-disc" aria-hidden="true">♙</div><h3 data-i18n="why.card3.title">Diawasi Ahli Gizi</h3><p data-i18n="why.card3.text">Menu dirancang agar seimbang, lengkap, dan tetap nikmat untuk dinikmati secara konsisten.</p></article>
+          <article class="info-card reveal"><div class="icon-disc" aria-hidden="true">◎</div><h3 data-i18n="why.card4.title">Nutrisi Lebih Personal</h3><p data-i18n="why.card4.text">Sesuaikan pilihan makanan dengan target kalori, protein, serat, dan kebutuhan harianmu.</p></article>
         </div>
-      </div>
-    </section>
-
-    <section class="section steps" id="how-it-works">
-      <div class="container">
-        <div class="section-title reveal">
-          <span class="kicker">🌱 HOW TO ORDER</span>
-          <h2>Healthy Meals in <span>4 Steps</span></h2>
-          <p>Pesan mudah, cepat, dan praktis. Kami siap menyiapkan makanan sehat favoritmu.</p>
-        </div>
-        <div class="step-grid">
-          <article class="step-card reveal"><b>1</b><div class="icon-disc">🥗</div><h3>Pilih Cara Makanmu</h3><p>Pilih Ready-to-eat, Ready-to-heat, atau Ready-to-cook.</p></article>
-          <article class="step-card reveal"><b>2</b><div class="icon-disc">📋</div><h3>Pilih Paket dan Menu</h3><p>Tentukan menu paket yang sesuai dengan kebutuhanmu.</p></article>
-          <article class="step-card reveal"><b>3</b><div class="icon-disc">🚚</div><h3>Atur Pengiriman</h3><p>Masukkan alamat, tanggal, dan slot jam pengiriman yang diinginkan.</p></article>
-          <article class="step-card reveal"><b>4</b><div class="icon-disc">💚</div><h3>Nikmati Makananmu</h3><p>Kami menyiapkan dan mengirimkan pesananmu sesuai jadwal.</p></article>
-        </div>
+        <p class="section-bridge reveal" data-i18n="why.bridge">Sudah memahami manfaatnya? Sekarang pilih paket yang paling cocok untuk rutinitasmu.</p>
       </div>
     </section>
 
     <section class="section meal-style" id="meal-style">
       <div class="container">
         <div class="section-title reveal">
-          <span class="kicker">🌱 CHOOSE YOUR MEAL STYLE</span>
-          <h2>Which <span>Meal Fits You?</span></h2>
-          <p>Different day, different you. Pick the option that fits your lifestyle best.</p>
+          <span class="kicker" data-i18n="plans.kicker">🌱 PILIH GAYA MAKANMU</span>
+          <h2 data-i18n-html="plans.title">Paket Mana yang <span>Cocok Untukmu?</span></h2>
+          <p data-i18n="plans.intro">Bandingkan tingkat kepraktisan, cara menikmati, dan harga untuk menemukan pilihan terbaik.</p>
         </div>
+
         <div class="plan-grid">
           <article class="plan-card reveal">
             <img src="assets/meal-box-green.webp" alt="Nutrisme Daily">
-            <div class="plan-body"><h3>Nutrisme Daily</h3><h4>Fresh Meals Delivered Daily</h4><p>Menu sehat yang dimasak setiap hari dan dikirim langsung ke tempatmu berada.</p><div class="price"><small>Mulai dari</small><strong>Rp 1.120.000</strong><span>/bulan</span></div><button class="btn btn-outline" type="button" data-open-order data-plan="Nutrisme Daily">Pilih Paket</button></div>
+            <div class="plan-body">
+              <h3>Nutrisme Daily</h3>
+              <h4 data-i18n="plans.daily.subtitle">Fresh Meal Diantar Setiap Hari</h4>
+              <p data-i18n="plans.daily.description">Menu sehat yang dimasak setiap hari dan dikirim langsung ke tempatmu berada.</p>
+              <div class="price price--promo">
+                <span class="price__label" data-i18n="plans.firstMonth">Bulan pertama pelanggan baru</span>
+                <span class="price__normal">Rp1.120.000</span>
+                <strong>Rp1.020.000</strong>
+                <span class="price__period" data-i18n="plans.firstMonthPeriod">/bulan pertama</span>
+                <small data-i18n="plans.nextDaily">Selanjutnya Rp1.120.000/bulan</small>
+              </div>
+              <p class="plan-summary" data-i18n="plans.daily.summary">Cocok untuk kamu yang ingin makanan segar siap santap setiap hari.</p>
+            </div>
           </article>
+
           <article class="plan-card reveal">
             <img src="assets/weekly-prep-gradient.webp" alt="Nutrisme Ready">
-            <div class="plan-body"><h3>Nutrisme Ready</h3><h4>Healthy Meals, Ready in Minutes</h4><p>Frozen meals yang cukup dipanaskan dalam beberapa menit. Praktis untuk stok.</p><div class="price"><small>Mulai dari</small><strong>Rp 820.000</strong><span>/bulan</span></div><button class="btn btn-outline" type="button" data-open-order data-plan="Nutrisme Ready">Pilih Paket</button></div>
+            <div class="plan-body">
+              <h3>Nutrisme Ready</h3>
+              <h4 data-i18n="plans.ready.subtitle">Makanan Sehat Siap dalam Hitungan Menit</h4>
+              <p data-i18n="plans.ready.description">Frozen meals yang cukup dipanaskan dalam beberapa menit dan praktis disimpan sebagai stok.</p>
+              <div class="price price--promo">
+                <span class="price__label" data-i18n="plans.firstMonth">Bulan pertama pelanggan baru</span>
+                <span class="price__normal">Rp820.000</span>
+                <strong>Rp720.000</strong>
+                <span class="price__period" data-i18n="plans.firstMonthPeriod">/bulan pertama</span>
+                <small data-i18n="plans.nextReady">Selanjutnya Rp820.000/bulan</small>
+              </div>
+              <p class="plan-summary" data-i18n="plans.ready.summary">Cocok untuk stok praktis yang tinggal dipanaskan saat dibutuhkan.</p>
+            </div>
           </article>
+
           <article class="plan-card reveal">
             <img src="assets/cook-kit-gradient.webp" alt="Nutrisme Cook">
-            <div class="plan-body"><h3>Nutrisme Cook</h3><h4>Cook Fresh, Without the Prep</h4><p>Seluruh bahan dan bumbu telah dipersiapkan dengan takaran nutrisi yang tepat.</p><div class="price"><small>Mulai dari</small><strong>Rp 700.000</strong><span>/bulan</span></div><button class="btn btn-outline" type="button" data-open-order data-plan="Nutrisme Cook">Pilih Paket</button></div>
+            <div class="plan-body">
+              <h3>Nutrisme Cook</h3>
+              <h4 data-i18n="plans.cook.subtitle">Masak Segar Tanpa Repot Persiapan</h4>
+              <p data-i18n="plans.cook.description">Seluruh bahan dan bumbu telah dipersiapkan dengan takaran nutrisi yang tepat.</p>
+              <div class="price price--promo">
+                <span class="price__label" data-i18n="plans.firstMonth">Bulan pertama pelanggan baru</span>
+                <span class="price__normal">Rp700.000</span>
+                <strong>Rp600.000</strong>
+                <span class="price__period" data-i18n="plans.firstMonthPeriod">/bulan pertama</span>
+                <small data-i18n="plans.nextCook">Selanjutnya Rp700.000/bulan</small>
+              </div>
+              <p class="plan-summary" data-i18n="plans.cook.summary">Cocok untuk kamu yang tetap ingin memasak tanpa repot menyiapkan bahan.</p>
+            </div>
           </article>
+        </div>
+        <p class="plan-promo-note reveal" data-i18n="plans.promoNote">Potongan Rp100.000 hanya berlaku bagi pelanggan tanpa riwayat pembayaran berstatus PAID atau ACTIVE.</p>
+        <p class="section-bridge reveal" data-i18n="plans.bridge">Sudah menemukan paket yang cocok? Proses berlangganan hanya membutuhkan empat langkah sederhana.</p>
+      </div>
+    </section>
+
+    <section class="section steps" id="how-it-works">
+      <div class="container">
+        <div class="section-title reveal">
+          <span class="kicker" data-i18n="steps.kicker">🌱 CARA BERLANGGANAN</span>
+          <h2 data-i18n-html="steps.title">Mulai dalam <span>4 Langkah</span></h2>
+          <p data-i18n="steps.intro">Pilih paket, lengkapi data, atur pengiriman bersama tim kami, lalu nikmati makananmu.</p>
+        </div>
+        <div class="step-grid">
+          <article class="step-card reveal"><b>1</b><div class="icon-disc" aria-hidden="true">🥗</div><h3 data-i18n="steps.card1.title">Pilih Cara Makanmu</h3><p data-i18n="steps.card1.text">Tentukan Fresh Meal, Ready-to-Heat, atau Ready-to-Cook.</p></article>
+          <article class="step-card reveal"><b>2</b><div class="icon-disc" aria-hidden="true">📋</div><h3 data-i18n="steps.card2.title">Pilih Paket dan Menu</h3><p data-i18n="steps.card2.text">Pilih paket yang sesuai, lalu tim kami membantu mengonfirmasi detail menu.</p></article>
+          <article class="step-card reveal"><b>3</b><div class="icon-disc" aria-hidden="true">🚚</div><h3 data-i18n="steps.card3.title">Atur Pengiriman</h3><p data-i18n="steps.card3.text">Konfirmasikan alamat, tanggal, dan jadwal pengiriman yang tersedia.</p></article>
+          <article class="step-card reveal"><b>4</b><div class="icon-disc" aria-hidden="true">💚</div><h3 data-i18n="steps.card4.title">Nikmati Makananmu</h3><p data-i18n="steps.card4.text">Kami menyiapkan dan mengirimkan pesanan sesuai paket yang telah dikonfirmasi.</p></article>
         </div>
       </div>
     </section>
 
-    <section class="section footer-cta">
+    <section class="section footer-cta" aria-labelledby="finalCtaTitle">
       <div class="container cta-panel reveal">
-        <div><h2>Start Your <span>Healthy Journey</span> Today</h2><p>Healthy meals with complete nutrition transparency, delivered to your doorstep.</p><button class="btn btn-light" type="button" data-open-order>Berlangganan Sekarang</button></div>
+        <div class="cta-panel__copy">
+          <h2 id="finalCtaTitle" data-i18n-html="final.title">Mulai <span>Perjalanan Sehatmu</span> Hari Ini</h2>
+          <p data-i18n="final.text">Pilih paket yang sesuai, isi satu formulir, dan tim Nutrisme akan menghubungimu untuk konfirmasi berikutnya.</p>
+          <button class="btn btn-light" type="button" data-scroll-hero-form data-i18n="cta.startSubscribe">Mulai Berlangganan</button>
+        </div>
         <img src="assets/meal-box.webp" alt="Healthy meal Nutrisme">
       </div>
     </section>
@@ -134,90 +240,116 @@
 
   <footer class="site-footer">
     <div class="container footer-grid">
-      <div class="footer-brand"><img src="assets/nutrisme-wordmark.png" alt="Nutrisme"><p>Healthy meals made simple.<br>Transparent nutrition, delivered to you.</p></div>
-      <div><h3>About</h3><a href="#why-us">About Us</a><a href="#home">Blog</a></div>
-      <div><h3>Meal Plans</h3><a href="#meal-style">Nutrisme Daily</a><a href="#meal-style">Nutrisme Ready</a><a href="#meal-style">Nutrisme Cook</a></div>
-      <div><h3>Contact</h3><a href="https://wa.me/6281234567890" target="_blank" rel="noopener">WhatsApp</a><a href="mailto:nutrisme.indonesia@gmail.com">Email</a><a href="https://instagram.com/nutrisme.id" target="_blank" rel="noopener">Instagram</a></div>
-      <div><h3>Follow Us</h3><p><strong>Instagram</strong><br>@nutrisme.id</p><p><strong>WhatsApp</strong><br>0812-3456-7890</p><p><strong>Email</strong><br>hello@nutrisme.com</p></div>
-      <p class="copyright">© <span id="currentYear"></span> Nutrisme. All rights reserved.</p>
+      <div class="footer-brand"><img src="assets/nutrisme-wordmark.png" alt="Nutrisme"><p data-i18n-html="footer.tagline">Makanan sehat dibuat lebih sederhana.<br>Nutrisi transparan, diantar untukmu.</p></div>
+      <div><h3 data-i18n="footer.about">Tentang</h3><a href="#why-us" data-i18n="footer.aboutUs">Tentang Kami</a><a href="#how-it-works" data-i18n="footer.how">Cara Kerja</a></div>
+      <div><h3 data-i18n="footer.plans">Paket</h3><a href="#meal-style">Nutrisme Daily</a><a href="#meal-style">Nutrisme Ready</a><a href="#meal-style">Nutrisme Cook</a></div>
+      <div><h3 data-i18n="footer.contact">Kontak</h3><a href="https://wa.me/6281234567890" target="_blank" rel="noopener">WhatsApp</a><a href="mailto:nutrisme.indonesia@gmail.com">Email</a><a href="https://instagram.com/nutrisme.id" target="_blank" rel="noopener">Instagram</a><button class="footer-policy" type="button" data-open-privacy data-i18n="privacy.link">Privacy Policy</button></div>
+      <div><h3 data-i18n="footer.follow">Ikuti Kami</h3><p><strong>Instagram</strong><br>@nutrisme.id</p><p><strong>WhatsApp</strong><br>0812-3456-7890</p><p><strong>Email</strong><br>nutrisme.indonesia@gmail.com</p></div>
+      <p class="copyright">© <span id="currentYear"></span> Nutrisme. <span data-i18n="footer.rights">Seluruh hak dilindungi.</span></p>
     </div>
   </footer>
 
-  <button class="floating-order" type="button" data-open-order>Berlangganan</button>
+  <button class="floating-order" type="button" data-open-order data-i18n="cta.subscribeShort">Berlangganan</button>
 
   <div class="modal" id="orderModal" aria-hidden="true">
     <div class="modal-backdrop" id="orderBackdrop"></div>
     <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="orderTitle" tabindex="-1">
-      <button class="modal-close" type="button" data-close-order aria-label="Tutup">×</button>
+      <button class="modal-close" type="button" data-close-order aria-label="Tutup" data-i18n-aria-label="access.close">×</button>
       <div id="orderFormView">
         <img class="modal-logo" src="assets/nutrisme-wordmark.png" alt="Nutrisme">
-        <span class="kicker">BERLANGGANAN SEKARANG</span>
-        <h2 id="orderTitle">Lengkapi data pelanggan.</h2>
-        <p>Semua data wajib diisi agar tim Nutrisme dapat menghubungi dan memproses langgananmu.</p>
+        <span class="kicker" data-i18n="form.kicker">BERLANGGANAN SEKARANG</span>
+        <h2 id="orderTitle" data-i18n="form.title">Lengkapi data pelanggan.</h2>
+        <p data-i18n="form.intro">Semua data wajib diisi agar tim Nutrisme dapat menghubungi dan memproses permintaan langgananmu.</p>
         <form id="orderForm" novalidate>
-          <div class="form-field" data-field="fullName"><label for="fullName">Nama Lengkap</label><input id="fullName" name="fullName" type="text" minlength="3" required placeholder="Masukkan nama lengkap"><small>Minimal 3 karakter.</small></div>
-          <div class="form-field" data-field="instagram"><label for="instagram">Username Instagram</label><div class="prefix-input"><span>@</span><input id="instagram" name="instagram" type="text" minlength="2" maxlength="50" required placeholder="username"></div><small>Gunakan huruf, angka, titik, atau underscore.</small></div>
-          <div class="form-field" data-field="address"><label for="address">Alamat Lengkap</label><textarea id="address" name="address" minlength="10" required rows="3" placeholder="Masukkan alamat lengkap"></textarea><small>Minimal 10 karakter.</small></div>
-          <div class="form-field" data-field="phone"><label for="phone">No. Handphone</label><div class="prefix-input"><span>+62</span><input id="phone" name="phone" type="tel" inputmode="numeric" minlength="8" maxlength="15" required placeholder="81234567890"></div><small>Nomor harus diawali angka 8.</small></div>
-          <div class="form-field"><label for="selectedPlan">Paket Pilihan</label><select id="selectedPlan" name="selectedPlan"><option value="Belum menentukan">Belum menentukan</option><option>Nutrisme Daily</option><option>Nutrisme Ready</option><option>Nutrisme Cook</option></select></div>
+          <div class="form-field" data-field="fullName">
+            <label for="fullName" data-i18n="form.name">Nama Lengkap</label>
+            <input id="fullName" name="fullName" type="text" autocomplete="name" minlength="3" required placeholder="Masukkan nama lengkap" data-i18n-placeholder="form.namePlaceholder">
+            <small data-i18n="validation.name">Minimal 3 karakter.</small>
+          </div>
+
+          <div class="form-field" data-field="instagram">
+            <label for="instagram" data-i18n="form.instagram">Username Instagram</label>
+            <div class="prefix-input"><span>@</span><input id="instagram" name="instagram" type="text" autocomplete="off" minlength="2" maxlength="50" required placeholder="username" data-i18n-placeholder="form.instagramPlaceholder"></div>
+            <small data-i18n="validation.instagram">Gunakan huruf, angka, titik, atau underscore.</small>
+          </div>
+
+          <div class="form-field" data-field="address">
+            <label for="address" data-i18n="form.address">Alamat Lengkap</label>
+            <textarea id="address" name="address" autocomplete="street-address" minlength="10" required rows="3" placeholder="Masukkan alamat lengkap" data-i18n-placeholder="form.addressPlaceholder"></textarea>
+            <small data-i18n="validation.address">Minimal 10 karakter.</small>
+          </div>
+
+          <div class="form-field" data-field="phone">
+            <label for="phone" data-i18n="form.phone">No. Handphone/WhatsApp</label>
+            <div class="prefix-input"><span>+62</span><input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="15" required placeholder="81234567890"></div>
+            <small data-i18n="validation.phone">Nomor harus diawali angka 8 dan berisi 8–15 digit.</small>
+          </div>
+
+          <div class="form-field" data-field="selectedPlan">
+            <label for="selectedPlan" data-i18n="form.plan">Paket Pilihan</label>
+            <select id="selectedPlan" name="selectedPlan" required>
+              <option value="" selected disabled data-i18n="form.planPlaceholder">Pilih paket terlebih dahulu</option>
+              <option value="Nutrisme Daily">Nutrisme Daily</option>
+              <option value="Nutrisme Ready">Nutrisme Ready</option>
+              <option value="Nutrisme Cook">Nutrisme Cook</option>
+            </select>
+            <small data-i18n="validation.plan">Silakan pilih salah satu paket Nutrisme.</small>
+          </div>
+
+          <div class="form-promo-summary">
+            <strong data-i18n="form.promoTitle">Promo bulan pertama</strong>
+            <p data-i18n="form.promoText">Diskon Rp100.000 akan diperiksa otomatis. Pelanggan dengan riwayat PAID atau ACTIVE tidak memenuhi syarat promo pelanggan baru.</p>
+          </div>
+
           <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" class="honeypot">
+
           <div class="consent" data-field="consent">
-            <input id="consent" type="checkbox" required>
+            <input id="consent" name="consent" type="checkbox" required>
             <div class="consent-copy">
-              <label for="consent">Saya telah membaca dan menyetujui</label>
-              <button class="privacy-link" id="privacyToggle" type="button" aria-haspopup="dialog" aria-controls="privacyModal">Privacy Policy</button><span aria-hidden="true">.</span>
+              <label for="consent" data-i18n="form.consent">Saya telah membaca dan menyetujui</label>
+              <button class="privacy-link" id="privacyToggle" type="button" aria-haspopup="dialog" aria-controls="privacyModal" data-i18n="privacy.link">Privacy Policy</button><span aria-hidden="true">.</span>
             </div>
           </div>
-          <button class="btn btn-primary submit-btn" id="submitOrder" type="submit" disabled>Berlangganan Sekarang</button>
+
+          <button class="btn btn-primary submit-btn" id="submitOrder" type="submit" disabled data-i18n="cta.subscribeNow">Berlangganan Sekarang</button>
           <p class="form-status" id="formStatus" aria-live="polite"></p>
         </form>
       </div>
-      <div class="success" id="orderSuccess" hidden><div>✓</div><h2>Terima kasih!</h2><p>Data langgananmu sudah dikirim. Tim Nutrisme akan menghubungimu.</p><button class="btn btn-primary" id="resetOrder" type="button">Pesan Lagi</button></div>
+
+      <div class="success" id="orderSuccess" hidden>
+        <div aria-hidden="true">✓</div>
+        <h2 data-i18n="success.title">Terima kasih!</h2>
+        <p id="successText" data-i18n="success.fullText">Data langgananmu sudah dikirim. Tim Nutrisme akan memverifikasi promo dan menghubungimu untuk konfirmasi.</p>
+        <button class="btn btn-primary" id="resetOrder" type="button" data-i18n="success.again">Pesan Lagi</button>
+      </div>
     </section>
   </div>
 
   <div class="modal privacy-modal" id="privacyModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-privacy></div>
     <section class="modal-dialog privacy-dialog" role="dialog" aria-modal="true" aria-labelledby="privacyTitle" aria-describedby="privacyIntro" tabindex="-1">
-      <button class="modal-close" type="button" data-close-privacy aria-label="Tutup Privacy Policy">×</button>
+      <button class="modal-close" type="button" data-close-privacy aria-label="Tutup Privacy Policy" data-i18n-aria-label="privacy.closeAria">×</button>
       <img class="modal-logo" src="assets/nutrisme-wordmark.png" alt="Nutrisme">
-      <span class="kicker">PRIVACY POLICY</span>
-      <h2 id="privacyTitle">Kebijakan Privasi Nutrisme</h2>
-      <p id="privacyIntro" class="privacy-intro">Kebijakan ini menjelaskan bagaimana data pada formulir berlangganan dikumpulkan dan digunakan.</p>
+      <span class="kicker" data-i18n="privacy.kicker">PRIVACY POLICY</span>
+      <h2 id="privacyTitle" data-i18n="privacy.title">Kebijakan Privasi Nutrisme</h2>
+      <p id="privacyIntro" class="privacy-intro" data-i18n="privacy.intro">Kebijakan ini menjelaskan bagaimana data pada formulir berlangganan dikumpulkan, digunakan, dan disimpan.</p>
 
       <div class="privacy-content">
-        <section>
-          <h3>1. Data yang dikumpulkan</h3>
-          <p>Nutrisme menerima nama lengkap, username Instagram, alamat, nomor handphone, paket pilihan, persetujuan Privacy Policy, serta informasi teknis pengiriman formulir.</p>
-        </section>
-        <section>
-          <h3>2. Tujuan penggunaan</h3>
-          <p>Data digunakan untuk menghubungi pelanggan, mengonfirmasi paket dan harga, mengatur pengiriman, memberikan layanan pelanggan, serta mencegah spam atau pengiriman formulir ganda.</p>
-        </section>
-        <section>
-          <h3>3. Penyimpanan dan pihak yang memproses</h3>
-          <p>Data formulir diproses melalui Google Apps Script dan dicatat pada Google Sheets. Akses hanya diberikan kepada pihak Nutrisme atau mitra operasional yang membutuhkannya untuk memproses layanan.</p>
-        </section>
-        <section>
-          <h3>4. Keamanan dan masa penyimpanan</h3>
-          <p>Nutrisme menerapkan langkah yang wajar untuk menjaga data. Data disimpan selama diperlukan untuk memproses langganan, memenuhi kewajiban operasional atau hukum, dan menyelesaikan keluhan.</p>
-        </section>
-        <section>
-          <h3>5. Hak pelanggan</h3>
-          <p>Pelanggan dapat meminta akses, koreksi, pembaruan, atau penghapusan data dengan menghubungi Nutrisme melalui WhatsApp 0812-3456-7890 atau email hello@nutrisme.com.</p>
-        </section>
-        <section>
-          <h3>6. Persetujuan</h3>
-          <p>Dengan mencentang persetujuan dan menekan “Berlangganan Sekarang”, pelanggan menyatakan telah membaca serta menyetujui pemrosesan data sesuai kebijakan ini.</p>
-        </section>
+        <section><h3 data-i18n="privacy.s1.title">1. Data yang dikumpulkan</h3><p data-i18n="privacy.s1.text">Nutrisme menerima nama lengkap, username Instagram, alamat, nomor handphone, paket pilihan, persetujuan Privacy Policy, serta informasi teknis pengiriman formulir.</p></section>
+        <section><h3 data-i18n="privacy.s2.title">2. Tujuan penggunaan</h3><p data-i18n="privacy.s2.text">Data digunakan untuk menghubungi pelanggan, mengonfirmasi paket dan harga, mengatur pengiriman, memberikan layanan pelanggan, serta mencegah spam atau pengiriman formulir ganda.</p></section>
+        <section><h3 data-i18n="privacy.s3.title">3. Verifikasi promo pelanggan baru</h3><p data-i18n="privacy.s3.text">Nomor handphone digunakan untuk memeriksa apakah pelanggan pernah memiliki riwayat pembayaran berstatus PAID atau ACTIVE. Jika tidak ditemukan, potongan Rp100.000 dicatat untuk pembayaran bulan pertama. Data berstatus LEAD atau CONTACTED tidak membatalkan kelayakan promo.</p></section>
+        <section><h3 data-i18n="privacy.s4.title">4. Penyimpanan dan pihak yang memproses</h3><p data-i18n="privacy.s4.text">Data formulir diproses melalui Google Apps Script dan dicatat pada Google Sheets. Akses hanya diberikan kepada pihak Nutrisme atau mitra operasional yang membutuhkannya untuk memproses layanan.</p></section>
+        <section><h3 data-i18n="privacy.s5.title">5. Keamanan dan masa penyimpanan</h3><p data-i18n="privacy.s5.text">Nutrisme menerapkan langkah yang wajar untuk menjaga data. Data disimpan selama diperlukan untuk memproses langganan, memenuhi kewajiban operasional atau hukum, dan menyelesaikan keluhan.</p></section>
+        <section><h3 data-i18n="privacy.s6.title">6. Hak pelanggan</h3><p data-i18n="privacy.s6.text">Pelanggan dapat meminta akses, koreksi, pembaruan, atau penghapusan data dengan menghubungi Nutrisme melalui WhatsApp 0812-3456-7890 atau email nutrisme.indonesia@gmail.com.</p></section>
+        <section><h3 data-i18n="privacy.s7.title">7. Persetujuan</h3><p data-i18n="privacy.s7.text">Dengan mencentang persetujuan dan menekan “Berlangganan Sekarang”, pelanggan menyatakan telah membaca serta menyetujui pemrosesan data sesuai kebijakan ini.</p></section>
       </div>
 
       <div class="privacy-actions">
-        <button class="btn btn-primary" type="button" data-close-privacy>Tutup Privacy Policy</button>
+        <button class="btn btn-primary" type="button" data-close-privacy data-i18n="privacy.close">Tutup Privacy Policy</button>
       </div>
     </section>
   </div>
 
-  <script src="script.js?v=20260718-2" defer></script>
+  <script src="script.js?v=20260719-11" defer></script>
 </body>
 </html>
