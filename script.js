@@ -1,4 +1,4 @@
-const NUTRISME_BUILD = "2026-07-21-20";
+const NUTRISME_BUILD = "2026-07-21-21";
 
 const TRANSLATIONS = {
   id: {
@@ -135,7 +135,9 @@ const TRANSLATIONS = {
     "status.failed": "Data belum berhasil dikirim. Coba lagi.",
     "success.title": "Terima kasih!",
     "success.fullText": "Data langgananmu sudah dikirim. Tim Nutrisme akan memverifikasi promo dan menghubungimu untuk konfirmasi.",
-    "success.leadText": "Minatmu sudah kami catat. Tim Nutrisme akan menghubungimu melalui Instagram untuk informasi berikutnya.",
+    "success.leadText": "Terima kasih! Data Anda sedang dikirim ke sistem Nutrisme.",
+    "success.leadSaved": "Data Anda berhasil tercatat. Tim Nutrisme akan menghubungi melalui Instagram.",
+    "success.leadFailed": "Data belum berhasil tersimpan. Silakan tutup pesan ini lalu kirim ulang.",
     "success.again": "Pesan Lagi",
     "success.close": "Tutup",
     "privacy.link": "Privacy Policy",
@@ -294,7 +296,9 @@ const TRANSLATIONS = {
     "status.failed": "Your details could not be sent. Please try again.",
     "success.title": "Thank you!",
     "success.fullText": "Your subscription request has been sent. The Nutrisme team will verify the offer and contact you for confirmation.",
-    "success.leadText": "We have recorded your interest. The Nutrisme team will contact you through Instagram with the next information.",
+    "success.leadText": "Thank you! Your data is being sent to the Nutrisme system.",
+    "success.leadSaved": "Your data has been recorded. The Nutrisme team will contact you through Instagram.",
+    "success.leadFailed": "Your data could not be saved. Please close this message and submit the form again.",
     "success.again": "Submit Another Request",
     "success.close": "Close",
     "privacy.link": "Privacy Policy",
@@ -344,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const thankYouModal = document.getElementById("thankYouModal");
   const thankYouDialog = thankYouModal ? thankYouModal.querySelector(".thank-you-dialog") : null;
   const thankYouClosers = thankYouModal ? thankYouModal.querySelectorAll("[data-close-thank-you]") : [];
+  const thankYouText = document.getElementById("thankYouText");
 
   let currentLanguage = localStorage.getItem("nutrisme-language") === "en" ? "en" : "id";
   let privacyLastFocus = null;
@@ -484,73 +489,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const appsScriptMeta = document.querySelector('meta[name="nutrisme-apps-script-url"]');
   const APPS_SCRIPT_URL = String(appsScriptMeta ? appsScriptMeta.content : "").trim();
-  const SUBMISSION_FRAME_LIFETIME_MS = 15000;
 
-  const jsonpRequest = (parameters, timeoutMs = 8000) => new Promise((resolve, reject) => {
+  const jsonpRequest = (parameters, timeoutMs = 15000) => new Promise((resolve, reject) => {
     if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(APPS_SCRIPT_URL)) {
       const error = new Error("Apps Script URL tidak valid.");
       error.code = "BACKEND_CONFIG";
       reject(error);
       return;
     }
+
     const callbackName = `__nutrismeJsonp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const script = document.createElement("script");
     let timer = null;
+
     const cleanup = () => {
       if (timer) window.clearTimeout(timer);
       script.remove();
       try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
     };
-    window[callbackName] = (response) => { cleanup(); resolve(response); };
+
+    window[callbackName] = (response) => {
+      cleanup();
+      resolve(response);
+    };
+
     script.onerror = () => {
       cleanup();
       const error = new Error("Apps Script tidak dapat dijangkau.");
       error.code = "BACKEND_UNREACHABLE";
       reject(error);
     };
-    const query = new URLSearchParams({ ...parameters, callback: callbackName, _: String(Date.now()) });
+
+    const query = new URLSearchParams({
+      ...parameters,
+      callback: callbackName,
+      _: String(Date.now())
+    });
+
     script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
     script.async = true;
+
     timer = window.setTimeout(() => {
       cleanup();
       const error = new Error("Apps Script tidak merespons.");
-      error.code = "BACKEND_UNREACHABLE";
+      error.code = "BACKEND_TIMEOUT";
       reject(error);
     }, timeoutMs);
+
     document.head.appendChild(script);
   });
 
-  const postViaHiddenFrame = (payload) => {
-    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(APPS_SCRIPT_URL)) {
-      const error = new Error("Apps Script URL tidak valid.");
-      error.code = "BACKEND_CONFIG";
-      throw error;
-    }
-    const frameName = `nutrismeSubmit_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const frame = document.createElement("iframe");
-    frame.name = frameName;
-    frame.title = "Nutrisme submission transport";
-    frame.hidden = true;
-    const transportForm = document.createElement("form");
-    transportForm.method = "POST";
-    transportForm.action = APPS_SCRIPT_URL;
-    transportForm.target = frameName;
-    transportForm.hidden = true;
-    Object.entries(payload).forEach(([name, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = String(value == null ? "" : value);
-      transportForm.appendChild(input);
-    });
-    document.body.append(frame, transportForm);
-    transportForm.submit();
-    transportForm.remove();
-    window.setTimeout(() => frame.remove(), SUBMISSION_FRAME_LIFETIME_MS);
+  const setThankYouText = (translationKey) => {
+    if (!thankYouText) return;
+    thankYouText.dataset.i18n = translationKey;
+    thankYouText.textContent = t(translationKey);
   };
 
-  const openThankYou = () => {
+  const openThankYou = (translationKey = "success.leadText") => {
     if (!thankYouModal || !thankYouDialog) return;
+    setThankYouText(translationKey);
     thankYouLastFocus = document.activeElement;
     thankYouModal.classList.add("open");
     thankYouModal.setAttribute("aria-hidden", "false");
@@ -574,9 +571,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (thankYouModal) {
     thankYouModal.addEventListener("click", (event) => {
-      if (event.target === thankYouModal) closeThankYou();
+      if (event.target === thankYouModal || event.target.matches(".modal-backdrop")) closeThankYou();
     });
   }
+
+  const createRequestId = () => (window.crypto && typeof window.crypto.randomUUID === "function")
+    ? window.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   heroLeadForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -594,38 +595,50 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const payload = {
+      action: "createHeroLead",
+      build: NUTRISME_BUILD,
+      requestId: createRequestId(),
+      bahasa: currentLanguage,
+      nama: heroFullName.value.trim(),
+      instagram: normalizeIg(heroInstagram.value),
+      consent: "yes",
+      source: `${window.location.href.split("#")[0]}#hero-quick-form`,
+      waktuKlien: new Date().toISOString(),
+      website: heroWebsite.value.trim()
+    };
+
     heroSubmit.disabled = true;
     heroSubmit.setAttribute("aria-busy", "true");
     heroFormStatus.textContent = t("hero.statusSending");
 
-    try {
-      postViaHiddenFrame({
-        action: "createHeroLead",
-        build: NUTRISME_BUILD,
-        bahasa: currentLanguage,
-        nama: heroFullName.value.trim(),
-        instagram: normalizeIg(heroInstagram.value),
-        consent: "yes",
-        source: `${window.location.href.split("#")[0]}#hero-quick-form`,
-        waktuKlien: new Date().toISOString(),
-        website: heroWebsite.value.trim()
+    // The popup appears immediately, as requested. The JSONP request continues
+    // in the background and updates the message when Google Sheets responds.
+    openThankYou("success.leadText");
+    heroLeadForm.reset();
+    Object.values(heroFields).forEach((field) => field.classList.remove("invalid", "valid"));
+    heroFormStatus.textContent = "";
+
+    jsonpRequest(payload, 15000)
+      .then((response) => {
+        if (!response || response.status !== "ok") {
+          const error = new Error(response && response.message ? response.message : "Data tidak tersimpan.");
+          error.code = "BACKEND_ERROR";
+          throw error;
+        }
+        document.documentElement.dataset.backend = "connected";
+        setThankYouText("success.leadSaved");
+      })
+      .catch((error) => {
+        document.documentElement.dataset.backend = "error";
+        console.error("Hero lead gagal tersimpan:", error);
+        setThankYouText("success.leadFailed");
+      })
+      .finally(() => {
+        heroSubmit.removeAttribute("aria-busy");
+        updateHeroStatus();
       });
-
-      // Show confirmation immediately after the browser sends the request.
-      // The UI intentionally does not wait for a Spreadsheet confirmation.
-      heroLeadForm.reset();
-      Object.values(heroFields).forEach((field) => field.classList.remove("invalid", "valid"));
-      heroFormStatus.textContent = "";
-      openThankYou();
-    } catch (error) {
-      console.error("Hero lead gagal dikirim:", error);
-      heroFormStatus.textContent = t("hero.statusBackend");
-    } finally {
-      heroSubmit.removeAttribute("aria-busy");
-      updateHeroStatus();
-    }
   });
-
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && thankYouModal && thankYouModal.classList.contains("open")) {

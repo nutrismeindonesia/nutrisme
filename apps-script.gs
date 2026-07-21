@@ -1,5 +1,5 @@
 // Nutrisme - Google Apps Script backend
-// Build 2026-07-21-20
+// Build 2026-07-21-21
 // Active form: short Hero form only.
 
 var CONFIG = {
@@ -9,7 +9,7 @@ var CONFIG = {
   NOTIFICATION_EMAIL: "nutrismeindonesia@gmail.com",
   EMAIL_SENDER_NAME: "Nutrisme Indonesia",
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-21-20"
+  APP_VERSION: "2026-07-21-21"
 };
 
 var HEADERS = [
@@ -21,24 +21,22 @@ var HEADERS = [
 ];
 
 function doGet(e) {
-  var parameters = e && e.parameter ? e.parameter : {};
-  var callback = cleanText_(parameters.callback, 180);
+  var params = e && e.parameter ? e.parameter : {};
+  var callback = cleanText_(params.callback, 180);
+  var action = cleanText_(params.action, 40) || "health";
 
   try {
-    var spreadsheet = getSpreadsheet_();
-    var sheet = getOrCreateSheet_();
+    if (action === "createHeroLead") {
+      return webOutput_(createHeroLead_(params), callback);
+    }
 
-    return webOutput_({
-      status: "ok",
-      connected: true,
-      service: "Nutrisme short lead form",
-      spreadsheet: spreadsheet.getName(),
-      sheet: sheet.getName(),
-      columns: HEADERS,
-      version: CONFIG.APP_VERSION,
-      time: Utilities.formatDate(new Date(), CONFIG.TIME_ZONE, "yyyy-MM-dd HH:mm:ss")
-    }, callback);
+    if (action !== "health") {
+      throw new Error("Aksi tidak dikenal.");
+    }
+
+    return webOutput_(healthPayload_(), callback);
   } catch (error) {
+    console.error("Nutrisme GET failed: " + errorMessage_(error));
     return webOutput_({
       status: "error",
       connected: false,
@@ -49,29 +47,52 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  var lock = null;
-
   try {
     var data = readPayload_(e);
+    var action = cleanText_(data.action, 40);
 
-    // Honeypot: silently ignore automated submissions.
-    if (cleanText_(data.website, 200) !== "") {
-      return jsonOutput_({ status: "ok", ignored: true, version: CONFIG.APP_VERSION });
-    }
-
-    if (cleanText_(data.action, 40) !== "createHeroLead") {
+    if (action !== "createHeroLead") {
       throw new Error("Aksi tidak dikenal.");
     }
 
-    var lead = validateHeroLead_(data);
-    var submittedAt = new Date();
+    return jsonOutput_(createHeroLead_(data));
+  } catch (error) {
+    console.error("Nutrisme POST failed: " + errorMessage_(error));
+    return jsonOutput_({
+      status: "error",
+      message: errorMessage_(error),
+      version: CONFIG.APP_VERSION
+    });
+  }
+}
 
-    lock = LockService.getScriptLock();
-    lock.waitLock(10000);
+function createHeroLead_(data) {
+  // Honeypot: silently ignore automated submissions.
+  if (cleanText_(data.website, 200) !== "") {
+    return { status: "ok", ignored: true, version: CONFIG.APP_VERSION };
+  }
 
-    var sheet = getOrCreateSheet_();
+  var lead = validateHeroLead_(data);
+  var requestId = cleanText_(data.requestId, 100);
+  var cache = CacheService.getScriptCache();
+  var cacheKey = requestId ? "lead_" + requestId : "";
+
+  if (cacheKey && cache.get(cacheKey)) {
+    return {
+      status: "ok",
+      duplicate: true,
+      version: CONFIG.APP_VERSION
+    };
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+
+  try {
+    var sheet = getReadySheet_();
     var nextRow = Math.max(sheet.getLastRow(), 1) + 1;
     var number = nextRow - 1;
+    var submittedAt = new Date();
 
     sheet.getRange(nextRow, 1, 1, HEADERS.length).setValues([[
       number,
@@ -86,8 +107,7 @@ function doPost(e) {
     sheet.getRange(nextRow, 4, 1, 2).setNumberFormat("@");
     SpreadsheetApp.flush();
 
-    lock.releaseLock();
-    lock = null;
+    if (cacheKey) cache.put(cacheKey, "1", 21600);
 
     try {
       sendNotificationEmail_(lead, number, submittedAt);
@@ -95,63 +115,64 @@ function doPost(e) {
       console.error("Email notification failed: " + errorMessage_(mailError));
     }
 
-    return jsonOutput_({
+    return {
       status: "ok",
       number: number,
+      spreadsheet: CONFIG.SPREADSHEET_NAME,
+      sheet: CONFIG.SHEET_NAME,
       version: CONFIG.APP_VERSION
-    });
-  } catch (error) {
-    if (lock) {
-      try { lock.releaseLock(); } catch (ignore) {}
-    }
-
-    console.error("Nutrisme submission failed: " + errorMessage_(error));
-    return jsonOutput_({
-      status: "error",
-      message: errorMessage_(error),
-      version: CONFIG.APP_VERSION
-    });
+    };
+  } finally {
+    lock.releaseLock();
   }
 }
 
-// Jalankan satu kali dari editor Apps Script sebelum membuat deployment Web App.
-function setupNutrisme() {
+function healthPayload_() {
   var spreadsheet = getSpreadsheet_();
-  if (spreadsheet.getName() !== CONFIG.SPREADSHEET_NAME) {
-    spreadsheet.rename(CONFIG.SPREADSHEET_NAME);
-  }
+  var sheet = getReadySheet_();
 
-  var sheet = getOrCreateSheet_();
-  formatSheet_(sheet);
-
-  var result = {
+  return {
     status: "ok",
+    connected: true,
+    service: "Nutrisme short lead form",
     spreadsheetId: spreadsheet.getId(),
     spreadsheet: spreadsheet.getName(),
     sheet: sheet.getName(),
     columns: HEADERS,
-    notificationEmail: CONFIG.NOTIFICATION_EMAIL,
-    version: CONFIG.APP_VERSION
+    version: CONFIG.APP_VERSION,
+    time: Utilities.formatDate(new Date(), CONFIG.TIME_ZONE, "yyyy-MM-dd HH:mm:ss")
   };
+}
 
+// Run once from the Apps Script editor before deploying the web app.
+function setupNutrisme() {
+  var spreadsheet = getSpreadsheet_();
+
+  if (spreadsheet.getName() !== CONFIG.SPREADSHEET_NAME) {
+    spreadsheet.rename(CONFIG.SPREADSHEET_NAME);
+  }
+
+  var sheet = getOrCreateSheetForSetup_();
+  migrateSchema_(sheet);
+  formatSheet_(sheet);
+
+  var result = healthPayload_();
+  result.notificationEmail = CONFIG.NOTIFICATION_EMAIL;
   console.log(JSON.stringify(result));
   return result;
 }
 
-// Tes tulis tanpa perlu membuka landing page.
 function testHeroLeadNutrisme() {
-  return doPost({
-    parameter: {
-      action: "createHeroLead",
-      nama: "TEST NUTRISME",
-      instagram: "nutrisme.test",
-      consent: "yes",
-      website: ""
-    }
+  return createHeroLead_({
+    action: "createHeroLead",
+    requestId: "test-" + new Date().getTime(),
+    nama: "TEST NUTRISME",
+    instagram: "nutrisme.test",
+    consent: "yes",
+    website: ""
   });
 }
 
-// Tes izin dan pengiriman notifikasi email.
 function testNotificationEmailNutrisme() {
   MailApp.sendEmail({
     to: CONFIG.NOTIFICATION_EMAIL,
@@ -172,17 +193,9 @@ function validateHeroLead_(data) {
   var instagram = normalizeInstagram_(data.instagram);
   var consent = cleanText_(data.consent, 10).toLowerCase();
 
-  if (name.length < 3) {
-    throw new Error("Nama lengkap minimal 3 karakter.");
-  }
-
-  if (!/^[A-Za-z0-9._]{2,50}$/.test(instagram)) {
-    throw new Error("Username Instagram tidak valid.");
-  }
-
-  if (consent !== "yes") {
-    throw new Error("Persetujuan Privacy Policy wajib diberikan.");
-  }
+  if (name.length < 3) throw new Error("Nama lengkap minimal 3 karakter.");
+  if (!/^[A-Za-z0-9._]{2,50}$/.test(instagram)) throw new Error("Username Instagram tidak valid.");
+  if (consent !== "yes") throw new Error("Persetujuan Privacy Policy wajib diberikan.");
 
   return {
     name: name,
@@ -190,51 +203,19 @@ function validateHeroLead_(data) {
   };
 }
 
-function sendNotificationEmail_(lead, number, submittedAt) {
-  var spreadsheetUrl = getSpreadsheet_().getUrl();
-  var dateText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "dd/MM/yyyy");
-  var timeText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "HH:mm:ss");
-  var subject = "Data Form Nutrisme Baru - " + lead.name;
-  var body =
-    "Data baru telah masuk melalui form singkat Nutrisme.\n\n" +
-    "No: " + number + "\n" +
-    "Tanggal: " + dateText + "\n" +
-    "Jam: " + timeText + "\n" +
-    "Nama Lengkap: " + lead.name + "\n" +
-    "Username Instagram: " + lead.instagram + "\n\n" +
-    "Spreadsheet: " + spreadsheetUrl;
-
-  MailApp.sendEmail({
-    to: CONFIG.NOTIFICATION_EMAIL,
-    subject: subject,
-    body: body,
-    htmlBody:
-      '<div style="font-family:Arial,sans-serif;color:#18342d;line-height:1.6">' +
-      '<h2 style="color:#07563f">Data Form Nutrisme Baru</h2>' +
-      '<p><strong>No:</strong> ' + htmlEscape_(number) + '</p>' +
-      '<p><strong>Tanggal:</strong> ' + htmlEscape_(dateText) + '</p>' +
-      '<p><strong>Jam:</strong> ' + htmlEscape_(timeText) + '</p>' +
-      '<p><strong>Nama Lengkap:</strong> ' + htmlEscape_(lead.name) + '</p>' +
-      '<p><strong>Username Instagram:</strong> ' + htmlEscape_(lead.instagram) + '</p>' +
-      '<p><a href="' + htmlEscape_(spreadsheetUrl) + '" style="color:#07563f;font-weight:700">Buka Spreadsheet</a></p>' +
-      '</div>',
-    name: CONFIG.EMAIL_SENDER_NAME
-  });
-}
-
 function getSpreadsheet_() {
   return SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
 }
 
-function getOrCreateSheet_() {
+function getOrCreateSheetForSetup_() {
   var spreadsheet = getSpreadsheet_();
   var sheet = spreadsheet.getSheetByName(CONFIG.SHEET_NAME);
 
   if (!sheet) {
-    var legacySheet = spreadsheet.getSheetByName("Order Nutrisme");
-    if (legacySheet) {
-      legacySheet.setName(CONFIG.SHEET_NAME);
-      sheet = legacySheet;
+    var legacy = spreadsheet.getSheetByName("Order Nutrisme");
+    if (legacy) {
+      legacy.setName(CONFIG.SHEET_NAME);
+      sheet = legacy;
     }
   }
 
@@ -246,12 +227,27 @@ function getOrCreateSheet_() {
     }
   }
 
+  if (!sheet) sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
+  return sheet;
+}
+
+function getReadySheet_() {
+  var spreadsheet = getSpreadsheet_();
+  var sheet = spreadsheet.getSheetByName(CONFIG.SHEET_NAME);
+
   if (!sheet) {
-    sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
+    throw new Error('Sheet "Order" belum tersedia. Jalankan setupNutrisme() satu kali.');
   }
 
-  migrateSchema_(sheet);
-  formatSheet_(sheet);
+  var displayed = sheet.getRange(1, 1, 1, HEADERS.length).getDisplayValues()[0];
+  var valid = HEADERS.every(function(header, index) {
+    return displayed[index] === header;
+  });
+
+  if (!valid) {
+    throw new Error("Struktur kolom belum sesuai. Jalankan setupNutrisme() satu kali.");
+  }
+
   return sheet;
 }
 
@@ -303,21 +299,13 @@ function migrateSchema_(sheet) {
   sheet.clear();
   ensureColumnCount_(sheet);
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-
   if (migratedRows.length) {
     sheet.getRange(2, 1, migratedRows.length, HEADERS.length).setValues(migratedRows);
   }
 }
 
-function valueFromHeader_(row, headerMap, header) {
-  return Object.prototype.hasOwnProperty.call(headerMap, header)
-    ? row[headerMap[header]]
-    : "";
-}
-
 function ensureColumnCount_(sheet) {
   var maxColumns = sheet.getMaxColumns();
-
   if (maxColumns < HEADERS.length) {
     sheet.insertColumnsAfter(maxColumns, HEADERS.length - maxColumns);
   } else if (maxColumns > HEADERS.length) {
@@ -327,14 +315,12 @@ function ensureColumnCount_(sheet) {
 
 function formatSheet_(sheet) {
   ensureColumnCount_(sheet);
-
   var header = sheet.getRange(1, 1, 1, HEADERS.length);
   header.setValues([HEADERS]);
   header.setFontWeight("bold");
   header.setBackground("#07563f");
   header.setFontColor("#ffffff");
   header.setHorizontalAlignment("center");
-
   sheet.setFrozenRows(1);
   sheet.setColumnWidth(1, 70);
   sheet.setColumnWidth(2, 110);
@@ -349,23 +335,40 @@ function formatSheet_(sheet) {
   }
 }
 
+function sendNotificationEmail_(lead, number, submittedAt) {
+  var spreadsheetUrl = getSpreadsheet_().getUrl();
+  var dateText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "dd/MM/yyyy");
+  var timeText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "HH:mm:ss");
+  var subject = "Data Form Nutrisme Baru - " + lead.name;
+  var body =
+    "Data baru telah masuk melalui form singkat Nutrisme.\n\n" +
+    "No: " + number + "\n" +
+    "Tanggal: " + dateText + "\n" +
+    "Jam: " + timeText + "\n" +
+    "Nama Lengkap: " + lead.name + "\n" +
+    "Username Instagram: " + lead.instagram + "\n\n" +
+    "Spreadsheet: " + spreadsheetUrl;
+
+  MailApp.sendEmail({
+    to: CONFIG.NOTIFICATION_EMAIL,
+    subject: subject,
+    body: body,
+    name: CONFIG.EMAIL_SENDER_NAME
+  });
+}
+
+function valueFromHeader_(row, headerMap, header) {
+  return Object.prototype.hasOwnProperty.call(headerMap, header) ? row[headerMap[header]] : "";
+}
+
 function readPayload_(e) {
   if (!e) throw new Error("Request event tidak tersedia.");
-
-  if (e.parameter && Object.keys(e.parameter).length) {
-    return e.parameter;
-  }
-
-  if (!e.postData || !e.postData.contents) {
-    throw new Error("Body request kosong.");
-  }
+  if (e.parameter && Object.keys(e.parameter).length) return e.parameter;
+  if (!e.postData || !e.postData.contents) throw new Error("Body request kosong.");
 
   var raw = String(e.postData.contents || "").trim();
   var contentType = String(e.postData.type || "").toLowerCase();
-
-  if (contentType.indexOf("application/x-www-form-urlencoded") === 0) {
-    return parseFormBody_(raw);
-  }
+  if (contentType.indexOf("application/x-www-form-urlencoded") === 0) return parseFormBody_(raw);
 
   try {
     return JSON.parse(raw);
@@ -376,7 +379,6 @@ function readPayload_(e) {
 
 function parseFormBody_(raw) {
   var data = {};
-
   raw.split("&").forEach(function(part) {
     if (!part) return;
     var pieces = part.split("=");
@@ -384,7 +386,6 @@ function parseFormBody_(raw) {
     var value = decodeURIComponent(pieces.join("=").replace(/\+/g, " "));
     data[key] = value;
   });
-
   return data;
 }
 
@@ -410,8 +411,7 @@ function webOutput_(payload, callback) {
   var safeCallback = String(callback || "").trim();
 
   if (safeCallback && /^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/.test(safeCallback)) {
-    return ContentService
-      .createTextOutput(safeCallback + "(" + json + ");")
+    return ContentService.createTextOutput(safeCallback + "(" + json + ");")
       .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
 
@@ -420,15 +420,6 @@ function webOutput_(payload, callback) {
 
 function jsonOutput_(payload) {
   return webOutput_(payload, "");
-}
-
-function htmlEscape_(value) {
-  return String(value == null ? "" : value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 function errorMessage_(error) {

@@ -1,68 +1,73 @@
-NUTRISME - LANGKAH KONEKSI GITHUB KE GOOGLE SHEETS
-Build: 2026-07-21-20
+NUTRISME V21 - SETUP WAJIB
+Build: 2026-07-21-21
 
-A. SIAPKAN GOOGLE APPS SCRIPT
-1. Buka Google Spreadsheet dengan ID:
-   1W84u1NlUBYCGrv80bsk9bp0-kt6uX8EcEz6uPju-_0M
-2. Di Spreadsheet, pilih Extensions > Apps Script.
-3. Buka file Code.gs, hapus kode lama, lalu salin seluruh isi file apps-script.gs dari paket ini.
-4. Klik Save.
-5. Pilih fungsi setupNutrisme, lalu klik Run.
-6. Setujui permintaan izin Google.
-7. Pastikan Execution log menampilkan:
-   - spreadsheet: Order
-   - sheet: Order
-   - columns: No, Tanggal, Jam, Nama Lengkap, Username Instagram
-8. Jalankan testHeroLeadNutrisme.
-9. Buka tab Order dan pastikan satu baris TEST NUTRISME muncul.
-10. Opsional: jalankan testNotificationEmailNutrisme untuk mengecek email notifikasi.
+PENYEBAB YANG DITEMUKAN
+1. Domain live masih menampilkan landing page lama/form lengkap, bukan file v20.
+2. v20 mengirim data lewat form POST ke iframe tersembunyi dan langsung menampilkan popup. Jika deployment salah, belum di-update, atau tidak punya akses ke Spreadsheet baru, pengguna tetap melihat popup tetapi baris tidak dibuat.
+3. URL Web App di index.html masih URL deployment lama. URL tersebut hanya benar jika deployment yang sama diperbarui ke kode Apps Script terbaru.
 
-B. DEPLOY APPS SCRIPT SEBAGAI WEB APP
-Cara yang disarankan agar URL di index.html tidak berubah:
-1. Di Apps Script, klik Deploy > Manage deployments.
-2. Pilih deployment Web App yang sudah digunakan situs.
-3. Klik ikon pensil/Edit.
-4. Pada Version, pilih New version.
-5. Execute as: Me.
-6. Who has access: Anyone.
-7. Klik Deploy.
-8. Salin Web App URL yang berakhiran /exec.
-9. Bandingkan URL itu dengan meta tag berikut di index.html:
-   <meta name="nutrisme-apps-script-url" content=".../exec">
-10. Jika URL berbeda, ganti nilai content pada meta tag tersebut dengan URL Web App terbaru.
+PERBAIKAN V21
+- Form aktif: Nama Lengkap, Username Instagram, checkbox Privacy Policy.
+- Kolom Sheet: No, Tanggal, Jam, Nama Lengkap, Username Instagram.
+- Pengiriman memakai JSONP GET yang dapat menerima respons sukses/error dari Apps Script tanpa masalah CORS.
+- Popup muncul langsung. Teks popup berubah menjadi berhasil atau gagal setelah Apps Script merespons.
+- Backend mendukung doGet untuk createHeroLead dan doPost sebagai cadangan.
+- Spreadsheet ID: 1W84u1NlUBYCGrv80bsk9bp0-kt6uX8EcEz6uPju-_0M
+- Nama Spreadsheet dan tab: Order
+
+A. PASANG APPS SCRIPT
+1. Buka Spreadsheet target dengan akun Google yang memiliki akses Editor:
+   https://docs.google.com/spreadsheets/d/1W84u1NlUBYCGrv80bsk9bp0-kt6uX8EcEz6uPju-_0M/edit
+2. Extensions > Apps Script.
+3. Hapus isi Code.gs, lalu paste seluruh isi apps-script.gs.
+4. Save.
+5. Pilih fungsi setupNutrisme, klik Run, dan izinkan akses.
+6. Pilih testHeroLeadNutrisme, klik Run.
+7. Pastikan tab Order mendapat satu baris TEST NUTRISME. Jika tes ini gagal, buka Executions dan lihat pesan error. Jangan lanjut ke GitHub sebelum tes manual berhasil.
+
+B. DEPLOY WEB APP
+Pilihan yang paling aman: buat deployment baru.
+1. Deploy > New deployment.
+2. Select type > Web app.
+3. Execute as: Me.
+4. Who has access: Anyone.
+5. Deploy dan salin URL /exec.
+6. Buka URL /exec di tab incognito. Harus tampil JSON dengan:
+   connected=true
+   spreadsheetId=1W84u1NlUBYCGrv80bsk9bp0-kt6uX8EcEz6uPju-_0M
+   spreadsheet=Order
+   sheet=Order
+   version=2026-07-21-21
+7. Buka index.html. Ganti content pada meta nutrisme-apps-script-url dengan URL /exec baru. Jangan memakai URL lama jika berasal dari project/deployment berbeda.
 
 C. UPLOAD KE GITHUB
-Upload/replace file dan folder berikut di root repository GitHub Pages:
-- index.html
-- script.js
-- style.css
-- folder assets beserta seluruh isinya
+1. Ekstrak ZIP. Upload ISI folder, bukan folder pembungkusnya.
+2. Di repository, root harus berisi:
+   index.html
+   script.js
+   style.css
+   CNAME
+   .nojekyll
+   assets/
+3. GitHub > Settings > Pages:
+   Source: Deploy from a branch
+   Branch: main (atau branch tempat file di-upload)
+   Folder: / (root)
+4. Pastikan Custom domain: www.nutrisme.biz.id.
+5. Tunggu Actions/Pages selesai.
+6. Buka view-source:https://www.nutrisme.biz.id/ dan cari 2026-07-21-21.
+   Jika tidak ada, domain masih melayani branch/repository/folder yang salah.
+7. Hard refresh Ctrl+Shift+R.
 
-File apps-script.gs dan README-SETUP.txt tidak perlu dipublikasikan untuk menjalankan landing page.
-apps-script.gs dipasang di editor Google Apps Script, bukan dijalankan dari GitHub.
-
-D. PASTIKAN GITHUB PAGES SUDAH MEMAKAI FILE TERBARU
-1. Commit semua perubahan ke branch yang dipakai GitHub Pages.
-2. Buka repository > Actions dan tunggu deployment selesai.
-3. Buka https://www.nutrisme.biz.id/
-4. Lakukan hard refresh:
-   Windows: Ctrl + Shift + R
-   Mac: Command + Shift + R
-5. View page source, lalu cari "2026-07-21-20".
-   Jika ditemukan, file terbaru sudah aktif.
-
-E. TES FORM DARI WEBSITE
-1. Isi Nama Lengkap dan Username Instagram.
-2. Centang checkbox persetujuan Privacy Policy.
+D. TES LIVE
+1. Isi Nama dan Instagram.
+2. Centang Privacy Policy.
 3. Klik Submit.
-4. Pop-up Terima kasih muncul langsung tanpa menunggu Google Sheets.
-5. Tunggu beberapa detik, lalu cek tab Order di Spreadsheet.
-6. Data harus masuk ke lima kolom berikut saja:
-   No | Tanggal | Jam | Nama Lengkap | Username Instagram
+4. Popup langsung muncul.
+5. Dalam beberapa detik, teks popup harus berubah menjadi "Data Anda berhasil tercatat...".
+6. Cek tab Order dan Apps Script > Executions.
 
-CATATAN PENTING
-- Pop-up sekarang muncul segera setelah browser mengirim request. Pop-up bukan bukti bahwa Google Sheets berhasil menulis data.
-- Jika pop-up muncul tetapi data tidak masuk, periksa Apps Script > Executions untuk melihat error backend.
-- Jika deployment baru dibuat (bukan Edit deployment lama), URL /exec biasanya berubah dan wajib diperbarui di index.html.
-
-- Checkbox Privacy Policy wajib dicentang, tetapi nilainya hanya divalidasi dan tidak disimpan sebagai kolom Spreadsheet.
+CATATAN
+- apps-script.gs tidak di-upload ke GitHub.
+- Jika membuat deployment baru, URL /exec harus ditempel ke index.html sebelum upload.
+- Jika hanya mengubah kode Apps Script tanpa membuat/update deployment, website tetap menjalankan backend lama.
