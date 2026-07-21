@@ -1,4 +1,4 @@
-const NUTRISME_BUILD = "2026-07-21-18";
+const NUTRISME_BUILD = "2026-07-21-19";
 
 const TRANSLATIONS = {
   id: {
@@ -27,7 +27,7 @@ const TRANSLATIONS = {
     "hero.formTitle": "Tertarik dengan Nutrisme?",
     "hero.formIntro": "Isi data singkat berikut dan tim kami akan menghubungimu melalui Instagram.",
     "hero.submit": "Submit",
-    "hero.statusIncomplete": "Lengkapi nama, username Instagram, dan persetujuan Privacy Policy.",
+    "hero.statusIncomplete": "Lengkapi nama dan username Instagram.",
     "hero.statusComplete": "Data siap dikirim.",
     "hero.statusSending": "Mengirim data...",
     "hero.statusInvalid": "Periksa kembali data yang belum valid.",
@@ -145,7 +145,7 @@ const TRANSLATIONS = {
     "privacy.closeAria": "Tutup Privacy Policy",
     "privacy.close": "Tutup Privacy Policy",
     "privacy.s1.title": "1. Data yang dikumpulkan",
-    "privacy.s1.text": "Form singkat mengumpulkan nama lengkap, username Instagram, persetujuan Privacy Policy, serta informasi teknis pengiriman.",
+    "privacy.s1.text": "Form singkat mengumpulkan nama lengkap, username Instagram, serta informasi teknis yang diperlukan untuk mengirim formulir.",
     "privacy.s2.title": "2. Tujuan penggunaan",
     "privacy.s2.text": "Data dari form singkat digunakan untuk menindaklanjuti minat calon pelanggan melalui Instagram serta mencegah spam atau pengiriman ganda.",
     "privacy.s3.title": "3. Verifikasi promo pelanggan baru",
@@ -185,7 +185,7 @@ const TRANSLATIONS = {
     "hero.formTitle": "Interested in Nutrisme?",
     "hero.formIntro": "Leave your details and our team will contact you through Instagram.",
     "hero.submit": "Submit",
-    "hero.statusIncomplete": "Complete your name, Instagram username, and Privacy Policy consent.",
+    "hero.statusIncomplete": "Complete your name and Instagram username.",
     "hero.statusComplete": "Your details are ready to send.",
     "hero.statusSending": "Sending your details...",
     "hero.statusInvalid": "Please review the fields that are not valid.",
@@ -304,7 +304,7 @@ const TRANSLATIONS = {
     "privacy.closeAria": "Close Privacy Policy",
     "privacy.close": "Close Privacy Policy",
     "privacy.s1.title": "1. Data we collect",
-    "privacy.s1.text": "The short form collects your full name, Instagram username, Privacy Policy consent, and technical submission information.",
+    "privacy.s1.text": "The short form collects your full name, Instagram username, and technical information required to submit the form.",
     "privacy.s2.title": "2. How we use the data",
     "privacy.s2.text": "Data from the short form is used to follow up with prospective customers through Instagram and prevent spam or duplicate submissions.",
     "privacy.s3.title": "3. New-customer offer verification",
@@ -336,7 +336,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const heroFormScrollButtons = document.querySelectorAll("[data-scroll-hero-form]");
   const heroFullName = document.getElementById("heroFullName");
   const heroInstagram = document.getElementById("heroInstagram");
-  const heroConsent = document.getElementById("heroConsent");
   const heroSubmit = document.getElementById("heroSubmit");
   const heroFormStatus = document.getElementById("heroFormStatus");
   const heroWebsite = document.getElementById("heroWebsite");
@@ -356,8 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const heroValidators = {
     heroFullName: () => heroFullName.value.trim().length >= 3,
-    heroInstagram: () => /^[A-Za-z0-9._]{2,50}$/.test(normalizeIg(heroInstagram.value)),
-    heroConsent: () => heroConsent.checked
+    heroInstagram: () => /^[A-Za-z0-9._]{2,50}$/.test(normalizeIg(heroInstagram.value))
   };
 
   const heroFields = {
@@ -378,8 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const isHeroFormValid = () => heroValidators.heroFullName()
-    && heroValidators.heroInstagram()
-    && heroValidators.heroConsent();
+    && heroValidators.heroInstagram();
 
   const updateHeroStatus = () => {
     if (heroSubmit.getAttribute("aria-busy") === "true") return;
@@ -480,13 +477,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     input.addEventListener("blur", () => markHero(input.id, true));
   });
-  heroConsent.addEventListener("change", updateHeroStatus);
 
   const appsScriptMeta = document.querySelector('meta[name="nutrisme-apps-script-url"]');
   const APPS_SCRIPT_URL = String(appsScriptMeta ? appsScriptMeta.content : "").trim();
-  const SUBMISSION_CONFIRM_TIMEOUT_MS = 30000;
-  const STATUS_POLL_INTERVAL_MS = 900;
-  const delay = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+  const SUBMISSION_FRAME_LIFETIME_MS = 15000;
 
   const jsonpRequest = (parameters, timeoutMs = 8000) => new Promise((resolve, reject) => {
     if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(APPS_SCRIPT_URL)) {
@@ -548,32 +542,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.append(frame, transportForm);
     transportForm.submit();
     transportForm.remove();
-    window.setTimeout(() => frame.remove(), SUBMISSION_CONFIRM_TIMEOUT_MS + 5000);
+    window.setTimeout(() => frame.remove(), SUBMISSION_FRAME_LIFETIME_MS);
   };
-
-  const waitForStoredRequest = async (requestId) => {
-    const deadline = Date.now() + SUBMISSION_CONFIRM_TIMEOUT_MS;
-    let lastError = null;
-    while (Date.now() < deadline) {
-      try {
-        const response = await jsonpRequest({ action: "status", requestId }, 7000);
-        if (response && response.status === "error") {
-          const error = new Error(response.message || "Apps Script mengembalikan error.");
-          error.code = "BACKEND_ERROR";
-          throw error;
-        }
-        if (response && response.status === "ok" && response.found === true) return response;
-      } catch (error) { lastError = error; }
-      await delay(STATUS_POLL_INTERVAL_MS);
-    }
-    const error = new Error(lastError ? lastError.message : "Data tidak ditemukan di Spreadsheet.");
-    error.code = lastError && lastError.code === "BACKEND_ERROR" ? "BACKEND_ERROR" : "SUBMISSION_UNCONFIRMED";
-    throw error;
-  };
-
-  const createRequestId = () => (window.crypto && typeof window.crypto.randomUUID === "function")
-    ? window.crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const openThankYou = () => {
     if (!thankYouModal || !thankYouDialog) return;
@@ -604,12 +574,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  heroLeadForm.addEventListener("submit", async (event) => {
+  heroLeadForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const checks = [markHero("heroFullName", true), markHero("heroInstagram", true), heroValidators.heroConsent()];
+
+    const checks = [
+      markHero("heroFullName", true),
+      markHero("heroInstagram", true)
+    ];
+
     if (!checks.every(Boolean)) {
       heroFormStatus.textContent = t("hero.statusInvalid");
-      const firstInvalid = [heroFullName, heroInstagram, heroConsent].find((element) => !element.checkValidity());
+      const firstInvalid = [heroFullName, heroInstagram].find((element) => !element.checkValidity());
       if (firstInvalid) firstInvalid.focus();
       return;
     }
@@ -617,34 +592,31 @@ document.addEventListener("DOMContentLoaded", () => {
     heroSubmit.disabled = true;
     heroSubmit.setAttribute("aria-busy", "true");
     heroFormStatus.textContent = t("hero.statusSending");
-    const requestId = createRequestId();
 
     try {
       postViaHiddenFrame({
         action: "createHeroLead",
         build: NUTRISME_BUILD,
-        requestId,
         bahasa: currentLanguage,
         nama: heroFullName.value.trim(),
         instagram: normalizeIg(heroInstagram.value),
-        consent: "yes",
         source: `${window.location.href.split("#")[0]}#hero-quick-form`,
         waktuKlien: new Date().toISOString(),
         website: heroWebsite.value.trim()
       });
-      await waitForStoredRequest(requestId);
+
+      // Show confirmation immediately after the browser sends the request.
+      // The UI intentionally does not wait for a Spreadsheet confirmation.
       heroLeadForm.reset();
       Object.values(heroFields).forEach((field) => field.classList.remove("invalid", "valid"));
       heroFormStatus.textContent = "";
-      heroSubmit.disabled = true;
       openThankYou();
     } catch (error) {
-      console.error("Hero lead gagal tersimpan:", error);
-      const backendProblem = error && ["BACKEND_CONFIG", "BACKEND_UNREACHABLE", "BACKEND_ERROR"].includes(error.code);
-      heroFormStatus.textContent = t(backendProblem ? "hero.statusBackend" : "hero.statusTimeout");
-      heroSubmit.disabled = false;
+      console.error("Hero lead gagal dikirim:", error);
+      heroFormStatus.textContent = t("hero.statusBackend");
     } finally {
       heroSubmit.removeAttribute("aria-busy");
+      updateHeroStatus();
     }
   });
 

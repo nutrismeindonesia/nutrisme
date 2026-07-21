@@ -1,53 +1,40 @@
 // Nutrisme - Google Apps Script backend
-// Build 2026-07-21-18
+// Build 2026-07-21-19
 // Active form: short Hero form only.
 
 var CONFIG = {
-  SPREADSHEET_ID: "1rhOPKMv0HSPlpb_Gl4RpNKdxRd0Y6_qFaTZbMfg8bl0",
+  SPREADSHEET_ID: "1W84u1NlUBYCGrv80bsk9bp0-kt6uX8EcEz6uPju-_0M",
+  SPREADSHEET_NAME: "Order",
   SHEET_NAME: "Order",
   NOTIFICATION_EMAIL: "nutrismeindonesia@gmail.com",
   EMAIL_SENDER_NAME: "Nutrisme Indonesia",
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-21-18"
+  APP_VERSION: "2026-07-21-19"
 };
 
-// Columns are limited to the currently active short form, plus a hidden Request ID
-// used only to confirm that a submission was stored successfully.
 var HEADERS = [
   "No",
-  "Waktu",
+  "Tanggal",
+  "Jam",
   "Nama Lengkap",
-  "Username Instagram",
-  "Persetujuan Privacy Policy",
-  "Request ID"
+  "Username Instagram"
 ];
 
 function doGet(e) {
-  var p = e && e.parameter ? e.parameter : {};
-  var callback = cleanText_(p.callback, 180);
+  var parameters = e && e.parameter ? e.parameter : {};
+  var callback = cleanText_(parameters.callback, 180);
 
   try {
-    var action = cleanText_(p.action || "health", 40);
+    var spreadsheet = getSpreadsheet_();
+    var sheet = getOrCreateSheet_();
 
-    if (action === "status") {
-      var requestId = cleanText_(p.requestId, 120);
-      if (!requestId) throw new Error("Request ID wajib diisi.");
-      var sheet = getOrCreateSheet_();
-      var found = findRequest_(sheet, requestId);
-      return webOutput_({
-        status: "ok",
-        connected: true,
-        found: found,
-        version: CONFIG.APP_VERSION
-      }, callback);
-    }
-
-    var activeSheet = getOrCreateSheet_();
     return webOutput_({
       status: "ok",
       connected: true,
       service: "Nutrisme short lead form",
-      sheet: activeSheet.getName(),
+      spreadsheet: spreadsheet.getName(),
+      sheet: sheet.getName(),
+      columns: HEADERS,
       version: CONFIG.APP_VERSION,
       time: Utilities.formatDate(new Date(), CONFIG.TIME_ZONE, "yyyy-MM-dd HH:mm:ss")
     }, callback);
@@ -62,10 +49,12 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  var lock;
+  var lock = null;
+
   try {
     var data = readPayload_(e);
 
+    // Honeypot: silently ignore automated submissions.
     if (cleanText_(data.website, 200) !== "") {
       return jsonOutput_({ status: "ok", ignored: true, version: CONFIG.APP_VERSION });
     }
@@ -75,43 +64,47 @@ function doPost(e) {
     }
 
     var lead = validateHeroLead_(data);
+    var submittedAt = new Date();
+
     lock = LockService.getScriptLock();
     lock.waitLock(10000);
 
     var sheet = getOrCreateSheet_();
-    if (!findRequest_(sheet, lead.requestId)) {
-      var nextRow = Math.max(sheet.getLastRow(), 1) + 1;
-      var number = nextRow - 1;
-      sheet.getRange(nextRow, 1, 1, HEADERS.length).setValues([[
-        number,
-        lead.createdAt,
-        safeSheetText_(lead.name),
-        safeSheetText_(lead.instagram),
-        "DISETUJUI",
-        lead.requestId
-      ]]);
-      sheet.getRange(nextRow, 2).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-      SpreadsheetApp.flush();
+    var nextRow = Math.max(sheet.getLastRow(), 1) + 1;
+    var number = nextRow - 1;
 
-      try {
-        sendNotificationEmail_(lead, number);
-      } catch (mailError) {
-        console.error("Email notification failed: " + errorMessage_(mailError));
-      }
-    }
+    sheet.getRange(nextRow, 1, 1, HEADERS.length).setValues([[
+      number,
+      submittedAt,
+      submittedAt,
+      safeSheetText_(lead.name),
+      safeSheetText_(lead.instagram)
+    ]]);
+
+    sheet.getRange(nextRow, 2).setNumberFormat("dd/MM/yyyy");
+    sheet.getRange(nextRow, 3).setNumberFormat("HH:mm:ss");
+    sheet.getRange(nextRow, 4, 1, 2).setNumberFormat("@");
+    SpreadsheetApp.flush();
 
     lock.releaseLock();
     lock = null;
 
+    try {
+      sendNotificationEmail_(lead, number, submittedAt);
+    } catch (mailError) {
+      console.error("Email notification failed: " + errorMessage_(mailError));
+    }
+
     return jsonOutput_({
       status: "ok",
-      requestId: lead.requestId,
+      number: number,
       version: CONFIG.APP_VERSION
     });
   } catch (error) {
     if (lock) {
       try { lock.releaseLock(); } catch (ignore) {}
     }
+
     console.error("Nutrisme submission failed: " + errorMessage_(error));
     return jsonOutput_({
       status: "error",
@@ -121,28 +114,43 @@ function doPost(e) {
   }
 }
 
+// Jalankan satu kali dari editor Apps Script sebelum membuat deployment Web App.
 function setupNutrisme() {
   var spreadsheet = getSpreadsheet_();
-  if (spreadsheet.getName() !== "Order") spreadsheet.rename("Order");
+  if (spreadsheet.getName() !== CONFIG.SPREADSHEET_NAME) {
+    spreadsheet.rename(CONFIG.SPREADSHEET_NAME);
+  }
+
   var sheet = getOrCreateSheet_();
-  sheet.setFrozenRows(1);
-  sheet.autoResizeColumns(1, HEADERS.length);
-  sheet.setColumnWidth(3, 220);
-  sheet.setColumnWidth(4, 200);
-  sheet.hideColumns(6); // Request ID is technical and not part of the visible form data.
+  formatSheet_(sheet);
 
   var result = {
     status: "ok",
-    spreadsheet: getSpreadsheet_().getName(),
+    spreadsheetId: spreadsheet.getId(),
+    spreadsheet: spreadsheet.getName(),
     sheet: sheet.getName(),
-    columns: HEADERS.length,
+    columns: HEADERS,
     notificationEmail: CONFIG.NOTIFICATION_EMAIL,
     version: CONFIG.APP_VERSION
   };
+
   console.log(JSON.stringify(result));
   return result;
 }
 
+// Tes tulis tanpa perlu membuka landing page.
+function testHeroLeadNutrisme() {
+  return doPost({
+    parameter: {
+      action: "createHeroLead",
+      nama: "TEST NUTRISME",
+      instagram: "nutrisme.test",
+      website: ""
+    }
+  });
+}
+
+// Tes izin dan pengiriman notifikasi email.
 function testNotificationEmailNutrisme() {
   MailApp.sendEmail({
     to: CONFIG.NOTIFICATION_EMAIL,
@@ -150,47 +158,45 @@ function testNotificationEmailNutrisme() {
     body: "Notifikasi email form singkat Nutrisme berhasil dikonfigurasi.",
     name: CONFIG.EMAIL_SENDER_NAME
   });
-  return { status: "ok", recipient: CONFIG.NOTIFICATION_EMAIL };
-}
 
-function testHeroLeadNutrisme() {
-  return doPost({ parameter: {
-    action: "createHeroLead",
-    requestId: "test-" + new Date().getTime(),
-    nama: "TEST NUTRISME",
-    instagram: "nutrisme.test",
-    consent: "yes",
-    website: ""
-  }});
+  return {
+    status: "ok",
+    recipient: CONFIG.NOTIFICATION_EMAIL,
+    version: CONFIG.APP_VERSION
+  };
 }
 
 function validateHeroLead_(data) {
   var name = cleanText_(data.nama, 100);
   var instagram = normalizeInstagram_(data.instagram);
-  var consent = String(data.consent || "").toLowerCase();
 
-  if (name.length < 3) throw new Error("Nama lengkap minimal 3 karakter.");
-  if (!/^[A-Za-z0-9._]{2,50}$/.test(instagram)) throw new Error("Username Instagram tidak valid.");
-  if (["yes", "true", "1"].indexOf(consent) === -1) throw new Error("Persetujuan Privacy Policy belum diberikan.");
+  if (name.length < 3) {
+    throw new Error("Nama lengkap minimal 3 karakter.");
+  }
+
+  if (!/^[A-Za-z0-9._]{2,50}$/.test(instagram)) {
+    throw new Error("Username Instagram tidak valid.");
+  }
 
   return {
     name: name,
-    instagram: "@" + instagram,
-    requestId: cleanText_(data.requestId, 120) || Utilities.getUuid(),
-    createdAt: new Date()
+    instagram: "@" + instagram
   };
 }
 
-function sendNotificationEmail_(lead, number) {
-  var sheetUrl = getSpreadsheet_().getUrl();
+function sendNotificationEmail_(lead, number, submittedAt) {
+  var spreadsheetUrl = getSpreadsheet_().getUrl();
+  var dateText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "dd/MM/yyyy");
+  var timeText = Utilities.formatDate(submittedAt, CONFIG.TIME_ZONE, "HH:mm:ss");
   var subject = "Data Form Nutrisme Baru - " + lead.name;
   var body =
     "Data baru telah masuk melalui form singkat Nutrisme.\n\n" +
     "No: " + number + "\n" +
+    "Tanggal: " + dateText + "\n" +
+    "Jam: " + timeText + "\n" +
     "Nama Lengkap: " + lead.name + "\n" +
-    "Username Instagram: " + lead.instagram + "\n" +
-    "Privacy Policy: Disetujui\n\n" +
-    "Spreadsheet: " + sheetUrl;
+    "Username Instagram: " + lead.instagram + "\n\n" +
+    "Spreadsheet: " + spreadsheetUrl;
 
   MailApp.sendEmail({
     to: CONFIG.NOTIFICATION_EMAIL,
@@ -199,10 +205,12 @@ function sendNotificationEmail_(lead, number) {
     htmlBody:
       '<div style="font-family:Arial,sans-serif;color:#18342d;line-height:1.6">' +
       '<h2 style="color:#07563f">Data Form Nutrisme Baru</h2>' +
+      '<p><strong>No:</strong> ' + htmlEscape_(number) + '</p>' +
+      '<p><strong>Tanggal:</strong> ' + htmlEscape_(dateText) + '</p>' +
+      '<p><strong>Jam:</strong> ' + htmlEscape_(timeText) + '</p>' +
       '<p><strong>Nama Lengkap:</strong> ' + htmlEscape_(lead.name) + '</p>' +
       '<p><strong>Username Instagram:</strong> ' + htmlEscape_(lead.instagram) + '</p>' +
-      '<p><strong>Privacy Policy:</strong> Disetujui</p>' +
-      '<p><a href="' + htmlEscape_(sheetUrl) + '" style="color:#07563f;font-weight:700">Buka Spreadsheet</a></p>' +
+      '<p><a href="' + htmlEscape_(spreadsheetUrl) + '" style="color:#07563f;font-weight:700">Buka Spreadsheet</a></p>' +
       '</div>',
     name: CONFIG.EMAIL_SENDER_NAME
   });
@@ -216,7 +224,6 @@ function getOrCreateSheet_() {
   var spreadsheet = getSpreadsheet_();
   var sheet = spreadsheet.getSheetByName(CONFIG.SHEET_NAME);
 
-  // Rename the previous tab instead of creating a second tab and leaving old data behind.
   if (!sheet) {
     var legacySheet = spreadsheet.getSheetByName("Order Nutrisme");
     if (legacySheet) {
@@ -225,56 +232,154 @@ function getOrCreateSheet_() {
     }
   }
 
-  if (!sheet) sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
+  if (!sheet) {
+    var sheets = spreadsheet.getSheets();
+    if (sheets.length === 1 && sheets[0].getLastRow() === 0) {
+      sheets[0].setName(CONFIG.SHEET_NAME);
+      sheet = sheets[0];
+    }
+  }
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
+  }
 
   migrateSchema_(sheet);
-  var header = sheet.getRange(1, 1, 1, HEADERS.length);
-  header.setValues([HEADERS]);
-  header.setFontWeight("bold").setBackground("#07563f").setFontColor("#ffffff");
-  sheet.setFrozenRows(1);
+  formatSheet_(sheet);
   return sheet;
 }
 
 function migrateSchema_(sheet) {
-  if (sheet.getLastRow() === 0) return;
-  var existingHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
-  var exact = HEADERS.every(function(header, index) { return existingHeaders[index] === header; });
-  if (exact && sheet.getLastColumn() === HEADERS.length) return;
+  var lastRow = sheet.getLastRow();
+  var lastColumn = Math.max(sheet.getLastColumn(), 1);
 
-  var map = {};
-  existingHeaders.forEach(function(header, index) { map[header] = index; });
-  var oldRows = sheet.getLastRow() > 1
-    ? sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues()
+  if (lastRow === 0) {
+    ensureColumnCount_(sheet);
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    return;
+  }
+
+  var existingHeaders = sheet.getRange(1, 1, 1, lastColumn).getDisplayValues()[0]
+    .map(function(value) { return String(value || "").trim(); });
+
+  var exact = HEADERS.every(function(header, index) {
+    return existingHeaders[index] === header;
+  }) && existingHeaders.length === HEADERS.length;
+
+  if (exact) {
+    ensureColumnCount_(sheet);
+    return;
+  }
+
+  var headerMap = {};
+  existingHeaders.forEach(function(header, index) {
+    if (header) headerMap[header] = index;
+  });
+
+  var oldRows = lastRow > 1
+    ? sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues()
     : [];
 
-  var migrated = oldRows.map(function(row, index) {
+  var migratedRows = oldRows.map(function(row, index) {
+    var oldTimestamp = valueFromHeader_(row, headerMap, "Waktu");
+    var oldDate = valueFromHeader_(row, headerMap, "Tanggal");
+    var oldTime = valueFromHeader_(row, headerMap, "Jam");
+
     return [
-      map["No"] !== undefined ? row[map["No"]] : index + 1,
-      map["Waktu"] !== undefined ? row[map["Waktu"]] : "",
-      map["Nama Lengkap"] !== undefined ? row[map["Nama Lengkap"]] : "",
-      map["Username Instagram"] !== undefined ? row[map["Username Instagram"]] : "",
-      map["Persetujuan Privacy Policy"] !== undefined ? row[map["Persetujuan Privacy Policy"]] : "DISETUJUI",
-      map["Request ID"] !== undefined ? row[map["Request ID"]] : "legacy-" + (index + 1)
+      valueFromHeader_(row, headerMap, "No") || (index + 1),
+      oldDate || oldTimestamp || "",
+      oldTime || oldTimestamp || "",
+      valueFromHeader_(row, headerMap, "Nama Lengkap"),
+      valueFromHeader_(row, headerMap, "Username Instagram")
     ];
   });
 
   sheet.clear();
+  ensureColumnCount_(sheet);
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-  if (migrated.length) sheet.getRange(2, 1, migrated.length, HEADERS.length).setValues(migrated);
+
+  if (migratedRows.length) {
+    sheet.getRange(2, 1, migratedRows.length, HEADERS.length).setValues(migratedRows);
+  }
 }
 
-function findRequest_(sheet, requestId) {
-  if (!requestId || sheet.getLastRow() < 2) return false;
-  var values = sheet.getRange(2, 6, sheet.getLastRow() - 1, 1).getDisplayValues();
-  return values.some(function(row) { return String(row[0]) === requestId; });
+function valueFromHeader_(row, headerMap, header) {
+  return Object.prototype.hasOwnProperty.call(headerMap, header)
+    ? row[headerMap[header]]
+    : "";
+}
+
+function ensureColumnCount_(sheet) {
+  var maxColumns = sheet.getMaxColumns();
+
+  if (maxColumns < HEADERS.length) {
+    sheet.insertColumnsAfter(maxColumns, HEADERS.length - maxColumns);
+  } else if (maxColumns > HEADERS.length) {
+    sheet.deleteColumns(HEADERS.length + 1, maxColumns - HEADERS.length);
+  }
+}
+
+function formatSheet_(sheet) {
+  ensureColumnCount_(sheet);
+
+  var header = sheet.getRange(1, 1, 1, HEADERS.length);
+  header.setValues([HEADERS]);
+  header.setFontWeight("bold");
+  header.setBackground("#07563f");
+  header.setFontColor("#ffffff");
+  header.setHorizontalAlignment("center");
+
+  sheet.setFrozenRows(1);
+  sheet.setColumnWidth(1, 70);
+  sheet.setColumnWidth(2, 110);
+  sheet.setColumnWidth(3, 90);
+  sheet.setColumnWidth(4, 240);
+  sheet.setColumnWidth(5, 220);
+
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).setNumberFormat("dd/MM/yyyy");
+    sheet.getRange(2, 3, sheet.getLastRow() - 1, 1).setNumberFormat("HH:mm:ss");
+    sheet.getRange(2, 4, sheet.getLastRow() - 1, 2).setNumberFormat("@");
+  }
 }
 
 function readPayload_(e) {
   if (!e) throw new Error("Request event tidak tersedia.");
-  if (e.parameter && Object.keys(e.parameter).length) return e.parameter;
-  if (!e.postData || !e.postData.contents) throw new Error("Body request kosong.");
-  try { return JSON.parse(e.postData.contents); }
-  catch (error) { throw new Error("Format body tidak valid."); }
+
+  if (e.parameter && Object.keys(e.parameter).length) {
+    return e.parameter;
+  }
+
+  if (!e.postData || !e.postData.contents) {
+    throw new Error("Body request kosong.");
+  }
+
+  var raw = String(e.postData.contents || "").trim();
+  var contentType = String(e.postData.type || "").toLowerCase();
+
+  if (contentType.indexOf("application/x-www-form-urlencoded") === 0) {
+    return parseFormBody_(raw);
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    throw new Error("Format body tidak valid.");
+  }
+}
+
+function parseFormBody_(raw) {
+  var data = {};
+
+  raw.split("&").forEach(function(part) {
+    if (!part) return;
+    var pieces = part.split("=");
+    var key = decodeURIComponent((pieces.shift() || "").replace(/\+/g, " "));
+    var value = decodeURIComponent(pieces.join("=").replace(/\+/g, " "));
+    data[key] = value;
+  });
+
+  return data;
 }
 
 function normalizeInstagram_(value) {
@@ -282,7 +387,11 @@ function normalizeInstagram_(value) {
 }
 
 function cleanText_(value, maxLength) {
-  return String(value == null ? "" : value).replace(/[\u0000-\u001F\u007F]/g, " ").trim().substring(0, maxLength || 500);
+  return String(value == null ? "" : value)
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .substring(0, maxLength || 500);
 }
 
 function safeSheetText_(value) {
@@ -290,16 +399,21 @@ function safeSheetText_(value) {
   return /^[=+\-@]/.test(text) ? "'" + text : text;
 }
 
-function jsonOutput_(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-}
+function webOutput_(payload, callback) {
+  var json = JSON.stringify(payload);
+  var safeCallback = String(callback || "").trim();
 
-function webOutput_(data, callback) {
-  if (callback && /^[A-Za-z_$][0-9A-Za-z_$\.]{0,179}$/.test(callback)) {
-    return ContentService.createTextOutput(callback + "(" + JSON.stringify(data) + ");")
+  if (safeCallback && /^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/.test(safeCallback)) {
+    return ContentService
+      .createTextOutput(safeCallback + "(" + json + ");")
       .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
-  return jsonOutput_(data);
+
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
+
+function jsonOutput_(payload) {
+  return webOutput_(payload, "");
 }
 
 function htmlEscape_(value) {
