@@ -1,14 +1,14 @@
 // Nutrisme - Google Apps Script backend
-// Build 2026-07-19-17
+// Build 2026-07-21-18
 // Active form: short Hero form only.
 
 var CONFIG = {
   SPREADSHEET_ID: "1rhOPKMv0HSPlpb_Gl4RpNKdxRd0Y6_qFaTZbMfg8bl0",
-  SHEET_NAME: "Order Nutrisme",
+  SHEET_NAME: "Order",
   NOTIFICATION_EMAIL: "nutrismeindonesia@gmail.com",
   EMAIL_SENDER_NAME: "Nutrisme Indonesia",
   TIME_ZONE: "Asia/Jakarta",
-  APP_VERSION: "2026-07-19-17"
+  APP_VERSION: "2026-07-21-18"
 };
 
 // Columns are limited to the currently active short form, plus a hidden Request ID
@@ -122,6 +122,8 @@ function doPost(e) {
 }
 
 function setupNutrisme() {
+  var spreadsheet = getSpreadsheet_();
+  if (spreadsheet.getName() !== "Order") spreadsheet.rename("Order");
   var sheet = getOrCreateSheet_();
   sheet.setFrozenRows(1);
   sheet.autoResizeColumns(1, HEADERS.length);
@@ -213,6 +215,16 @@ function getSpreadsheet_() {
 function getOrCreateSheet_() {
   var spreadsheet = getSpreadsheet_();
   var sheet = spreadsheet.getSheetByName(CONFIG.SHEET_NAME);
+
+  // Rename the previous tab instead of creating a second tab and leaving old data behind.
+  if (!sheet) {
+    var legacySheet = spreadsheet.getSheetByName("Order Nutrisme");
+    if (legacySheet) {
+      legacySheet.setName(CONFIG.SHEET_NAME);
+      sheet = legacySheet;
+    }
+  }
+
   if (!sheet) sheet = spreadsheet.insertSheet(CONFIG.SHEET_NAME);
 
   migrateSchema_(sheet);
